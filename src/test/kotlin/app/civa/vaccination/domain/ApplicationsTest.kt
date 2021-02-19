@@ -314,5 +314,4 @@ internal class ApplicationsTest {
 
         assertThat(applications.countAll()).isEqualTo(2)
     }
-
 }

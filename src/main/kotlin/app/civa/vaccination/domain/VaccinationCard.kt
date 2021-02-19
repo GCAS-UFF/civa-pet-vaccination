@@ -1,6 +1,6 @@
 package app.civa.vaccination.domain
 
-import java.util.*
+import java.util.UUID
 
 class VaccinationCard private constructor(
     private val id: UUID,
