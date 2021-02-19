@@ -2,7 +2,8 @@ package app.civa.vaccination.domain
 
 import java.util.UUID
 
-class VaccinationCard private constructor(
+class VaccinationCard
+private constructor(
     private val id: UUID,
     private val petID: UUID,
     private val species: Species,
@@ -25,10 +26,10 @@ class VaccinationCard private constructor(
         applications.deleteById(applicationId)
     }
 
-    fun findApplicationById(applicationId: UUID) {
+    fun findApplicationById(applicationId: UUID) =
         applications.findById(applicationId)
-    }
 
-    fun countAllApplications() = applications.countAll()
+
+    fun countAll() = applications.countAll()
 
 }
