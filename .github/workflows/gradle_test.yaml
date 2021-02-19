@@ -5,13 +5,6 @@ on:
     branches: [ '**' ]
 
 jobs:
-  analysis:
-    name: Static Code Analysis
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Detekt all
-        uses: natiginfo/action-detekt-all@1.16.0-RC1
 
   test:
     name: Test
