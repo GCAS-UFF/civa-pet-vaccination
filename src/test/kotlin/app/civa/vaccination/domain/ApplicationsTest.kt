@@ -85,7 +85,7 @@ internal class ApplicationsTest {
         fun shouldAddApplicationWhenCreatedOnIsDifferent() {
             val applications = Applications()
 
-            val newApplication = VaccineApplication(msdVaccine, petWeight)
+            val newApplication = VaccineApplication(zoetisVaccine, petWeight)
             ReflectionTestUtils.setField(
                 newApplication,
                 "createdOn",
@@ -100,19 +100,13 @@ internal class ApplicationsTest {
             assertThat(applications)
                 .isNotNull
                 .isNotEmpty
-                .size().isEqualTo(2)
-
-            assertThat(applications["Antirrábica"])
-                .isNotNull
-                .isNotEmpty
-                .contains(newApplication)
                 .size().isEqualTo(1)
 
             assertThat(applications["Múltipla V10"])
                 .isNotNull
                 .isNotEmpty
-                .contains(application)
-                .size().isEqualTo(1)
+                .contains(application, newApplication)
+                .size().isEqualTo(2)
         }
 
         @Test
@@ -314,5 +308,4 @@ internal class ApplicationsTest {
 
         assertThat(applications.countAll()).isEqualTo(2)
     }
-
 }
