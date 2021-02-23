@@ -1,5 +1,6 @@
 package app.civa.vaccination.domain
 
+import java.lang.RuntimeException
 import java.util.*
 import kotlin.NoSuchElementException
 
@@ -12,7 +13,7 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
     fun addEntry(entry: VaccineApplication) {
         val (vaccineName, application) = entry.toPair()
 
-        when (this[vaccineName]?.contains(application)) {
+        when (this[vaccineName]?.any { it == application }) {
             true -> handleException(vaccineName, application)
             else -> mergeEntry(vaccineName, application)
         }
@@ -51,13 +52,13 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
             ?.mapStatus(application)
 
         when (status) {
-            null -> return
+            null -> throw RuntimeException()
             else -> throw IllegalApplicationException(status)
         }
     }
 
     private fun mergeEntry(vaccineName: String, application: VaccineApplication) =
-        this.merge(vaccineName, setOf(application)) { a, b -> a union b }
+        this.merge(vaccineName, listOf(application)) { a, b -> a + b }
 
     override fun toString(): String {
         return "Applications(applications=${this.entries})"

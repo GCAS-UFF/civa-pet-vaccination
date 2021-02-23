@@ -44,6 +44,7 @@ internal class VaccineApplicationTest {
     }
 
     @Nested
+    @DisplayName("Equals")
     inner class Equals {
 
         private val applicationToday = VaccineApplication(vaccine, petWeight)
