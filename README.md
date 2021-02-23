@@ -21,7 +21,8 @@ Ideas to explore:
 - AWS
 
 ## Observations
-This project is using GitHub Action checks for testing the application on commits and building on pull requests.
+This project is using GitHub Action checks for testing the application on commits,  
+building on pull requests and scanning on both.
 
 ## Dependencies
 - Kotlin
