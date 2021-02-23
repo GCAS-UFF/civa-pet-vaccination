@@ -2,7 +2,6 @@ package app.civa.vaccination.domain
 
 import java.util.*
 
-
 class VaccineApplication
 private constructor(
     val id: UUID,
@@ -25,7 +24,7 @@ private constructor(
         vaccine.accept { builder.append(it) }
         val vaccineName = builder.toString()
 
-        return Pair(vaccineName, this)
+        return vaccineName to this
     }
 
     fun mustMatchSpecies(species: Species) {
