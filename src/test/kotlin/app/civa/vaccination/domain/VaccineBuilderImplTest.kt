@@ -7,20 +7,20 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 
-internal class VaccineBuilderTest {
+internal class VaccineBuilderImplTest {
 
     @Test
     @DisplayName("build entity successfully")
     fun build() {
-        val species = Species.CANINE
+        val species = setOf(Species.CANINE)
         val name = "Múltipla V8"
         val commercialName = "Vanguard® HTLP 5 CV-L"
         val company = "Zoetis"
-        val batch = "231/21"
+        val batch = Batch.from("231/21")
         val expirationDate = LocalDate.now(UTC).plusMonths(6)
 
         assertThatCode {
-            val vaccine = VaccineBuilder()
+            val vaccine = VaccineBuilderImpl()
                 .species(species)
                 .name(name)
                 .commercialName(commercialName)
@@ -32,11 +32,11 @@ internal class VaccineBuilderTest {
             assertThat(vaccine)
                 .isExactlyInstanceOf(Vaccine::class.java)
                 .hasNoNullFieldsOrProperties()
-                .hasFieldOrPropertyWithValue("species", setOf(species))
+                .hasFieldOrPropertyWithValue("species", species)
                 .hasFieldOrPropertyWithValue("name", name)
                 .hasFieldOrPropertyWithValue("commercialName", commercialName)
                 .hasFieldOrPropertyWithValue("company", company)
-                .hasFieldOrPropertyWithValue("batch", Batch.from(batch))
+                .hasFieldOrPropertyWithValue("batch", batch)
                 .hasFieldOrPropertyWithValue("expirationDate", ExpirationDate(expirationDate))
 
         }.doesNotThrowAnyException()

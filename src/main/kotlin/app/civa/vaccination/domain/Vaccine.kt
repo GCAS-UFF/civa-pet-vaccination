@@ -10,6 +10,7 @@ class Vaccine(
     private val batch: Batch,
     private val expirationDate: ExpirationDate
 ) {
+
     constructor(builder: VaccineBuilder) : this(
         builder.species,
         builder.name,
@@ -33,13 +34,9 @@ class Vaccine(
         visitor.seeExpirationDate(expirationDate)
     }
 
-    fun accept(consumer: Consumer<String>) {
-        consumer.accept(name)
-    }
+    fun accept(consumer: Consumer<String>) = consumer.accept(name)
 
-    fun mustBeValid() {
-        expirationDate.mustBeValid()
-    }
+    fun mustBeValid() = expirationDate.mustBeValid()
 
     fun matches(species: Species) = this.species.contains(species)
 
@@ -60,13 +57,12 @@ class Vaccine(
         return result
     }
 
-    override fun toString(): String {
-        return "Vaccine(species=$species,  " +
-               "name='$name', " +
-               "commercialName='$commercialName', " +
-               "company='$company', " +
-               "batch=$batch, " +
-               "expirationDate=$expirationDate)"
-    }
+    override fun toString() =
+        "Vaccine(species=$species,  " +
+        "name='$name', " +
+        "commercialName='$commercialName', " +
+        "company='$company', " +
+        "batch=$batch, " +
+        "expirationDate=$expirationDate)"
 
 }
