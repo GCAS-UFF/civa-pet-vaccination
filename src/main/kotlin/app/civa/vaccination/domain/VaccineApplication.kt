@@ -19,6 +19,20 @@ private constructor(
         vaccine.mustBeValid()
     }
 
+    constructor(builder: VaccineApplicationBuilder) : this(
+        builder.id,
+        builder.vaccine,
+        builder.petWeight,
+        builder.createdOn
+    )
+
+    fun accept(visitor: VaccineApplicationVisitor) {
+        visitor.seeId(id)
+        visitor.seeVaccine(vaccine)
+        visitor.seePetWeight(petWeight)
+        visitor.seeCreatedOn(createdOn)
+    }
+
     fun toPair(): Pair<String, VaccineApplication> {
         val builder = StringBuilder()
         vaccine.accept { builder.append(it) }
@@ -27,18 +41,17 @@ private constructor(
         return vaccineName to this
     }
 
-    fun mustMatchSpecies(species: Species) {
+    fun mustMatchSpecies(species: Species) =
         vaccine.mustMatchSpecies(species)
-    }
 
-    fun mapStatus(other: VaccineApplication) = createdOn.mapStatus(other.createdOn)
+    fun mapStatus(other: VaccineApplication) =
+        createdOn.mapStatus(other.createdOn)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as VaccineApplication
-
         return when {
             other.vaccine != vaccine -> false
             createdOn != other.createdOn -> false
@@ -52,10 +65,10 @@ private constructor(
         return result
     }
 
-    override fun toString(): String {
-        return "VaccineApplication(id=$id, " +
-               "vaccine=$vaccine, " +
-               "petWeight=$petWeight, " +
-               "createdOn=$createdOn)"
-    }
+    override fun toString() =
+        "VaccineApplication(id=$id, " +
+        "vaccine=$vaccine, " +
+        "petWeight=$petWeight, " +
+        "createdOn=$createdOn)"
+
 }
