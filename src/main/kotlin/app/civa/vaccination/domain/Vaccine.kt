@@ -10,10 +10,27 @@ class Vaccine(
     private val batch: Batch,
     private val expirationDate: ExpirationDate
 ) {
+    constructor(builder: VaccineBuilder) : this(
+        builder.species,
+        builder.name,
+        builder.commercialName,
+        builder.company,
+        builder.batch,
+        builder.expirationDate
+    )
 
     companion object {
 
         const val SPECIES_DOESNT_MATCH = "Species doesn't match vaccine's species"
+    }
+
+    fun accept(visitor: VaccineVisitor) {
+        visitor.seeSpecies(species)
+        visitor.seeName(name)
+        visitor.seeCommercialName(commercialName)
+        visitor.seeCompany(company)
+        visitor.seeBatch(batch)
+        visitor.seeExpirationDate(expirationDate)
     }
 
     fun accept(consumer: Consumer<String>) {

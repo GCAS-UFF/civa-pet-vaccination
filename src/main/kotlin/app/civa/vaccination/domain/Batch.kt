@@ -30,11 +30,28 @@ private constructor(private val number: String, private val year: Year) {
                 false -> throw IllegalArgumentException()
             }
         }
-
     }
 
     override fun toString(): String {
         return "Batch(number='$number', year=$year)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Batch
+        return when {
+            number != other.number -> false
+            year != other.year -> false
+            else -> true
+        }
+    }
+
+    override fun hashCode(): Int {
+        var result = number.hashCode()
+        result = 31 * result + year.hashCode()
+        return result
     }
 
 }
