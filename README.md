@@ -8,17 +8,21 @@ The main idea is to build a reactive microservice.
 
 Patterns employed:
 - Domain Driven Design
-- Ports and Adapaters Architecture
-- Reactive Paradigm
+- Hexagonal Architecture
+- CI/CD
 
 Ideas to explore:
+- Reactive Programming
+- Kafka
 - Event Sourcing
 - CQRS
-- Cloud Native
-- RSocket, Event Streaming or Server Side Events (SSE)
+- Server-sent Events
+- Kubernetes
+- AWS
 
 ## Observations
-This project is using GitHub Action checks for testing the application on commits and building on pull requests.
+This project is using GitHub Action checks for testing the application on commits,  
+building on pull requests and scanning on both.
 
 ## Dependencies
 - Kotlin
