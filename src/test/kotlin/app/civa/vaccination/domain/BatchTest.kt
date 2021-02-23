@@ -3,6 +3,7 @@ package app.civa.vaccination.domain
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.time.Year
 
 @DisplayName("Batch should")
 internal class BatchTest {
@@ -25,8 +26,7 @@ internal class BatchTest {
             Batch.from("99/999")
             Batch.from("/")
             Batch.from("1234/12")
-        }
-            .isInstanceOf(IllegalArgumentException::class.java)
+        }.isExactlyInstanceOf(IllegalArgumentException::class.java)
     }
 
     @Test
@@ -36,7 +36,14 @@ internal class BatchTest {
 
         assertThatCode {
             val batch = Batch.from(value)
-            assertThat(batch.value).isEqualTo(value)
+
+            assertThat(batch)
+                .isExactlyInstanceOf(Batch::class.java)
+                .hasNoNullFieldsOrProperties()
+                .hasFieldOrPropertyWithValue("number", "002")
+                .hasFieldOrPropertyWithValue("year", Year.of(2021))
+                .hasFieldOrPropertyWithValue("value", value)
+
         }.doesNotThrowAnyException()
     }
 }
