@@ -1,6 +1,5 @@
 package app.civa.vaccination.domain
 
-import java.lang.RuntimeException
 import java.util.*
 import kotlin.NoSuchElementException
 
@@ -52,7 +51,7 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
             ?.mapStatus(application)
 
         when (status) {
-            null -> throw RuntimeException()
+            null -> throw BusinessException()
             else -> throw IllegalApplicationException(status)
         }
     }
