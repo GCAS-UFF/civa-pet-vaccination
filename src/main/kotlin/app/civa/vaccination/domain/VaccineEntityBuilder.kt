@@ -2,7 +2,7 @@ package app.civa.vaccination.domain
 
 import java.time.LocalDate
 
-class VaccineBuilderImpl : VaccineBuilder{
+class VaccineEntityBuilder : VaccineBuilder{
 
     override lateinit var species: Collection<Species>
     override lateinit var name: String

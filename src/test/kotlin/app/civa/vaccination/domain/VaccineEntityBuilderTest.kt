@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 
-internal class VaccineBuilderImplTest {
+internal class VaccineEntityBuilderTest {
 
     @Test
     @DisplayName("build entity successfully")
@@ -20,7 +20,7 @@ internal class VaccineBuilderImplTest {
         val expirationDate = LocalDate.now(UTC).plusMonths(6)
 
         assertThatCode {
-            val vaccine = VaccineBuilderImpl()
+            val vaccine = VaccineEntityBuilder()
                 .species(species)
                 .name(name)
                 .commercialName(commercialName)
