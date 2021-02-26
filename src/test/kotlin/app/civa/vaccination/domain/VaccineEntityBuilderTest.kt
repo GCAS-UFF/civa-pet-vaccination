@@ -9,16 +9,20 @@ import java.time.ZoneOffset.UTC
 
 internal class VaccineEntityBuilderTest {
 
+    companion object {
+
+        private val species = setOf(Species.CANINE)
+        private val name = "Múltipla V8"
+        private val commercialName = "Vanguard® HTLP 5 CV-L"
+        private val company = "Zoetis"
+        private val batch = Batch.from("231/21")
+        private val expirationDate = LocalDate.now(UTC).plusMonths(6)
+
+    }
+
     @Test
     @DisplayName("build entity successfully")
     fun build() {
-        val species = setOf(Species.CANINE)
-        val name = "Múltipla V8"
-        val commercialName = "Vanguard® HTLP 5 CV-L"
-        val company = "Zoetis"
-        val batch = Batch.from("231/21")
-        val expirationDate = LocalDate.now(UTC).plusMonths(6)
-
         assertThatCode {
             val vaccine = VaccineEntityBuilder()
                 .species(species)
@@ -29,7 +33,7 @@ internal class VaccineEntityBuilderTest {
                 .expirationDate(expirationDate)
                 .build()
 
-            assertThat(vaccine)
+            assertThat(vaccine).isNotNull
                 .isExactlyInstanceOf(Vaccine::class.java)
                 .hasNoNullFieldsOrProperties()
                 .hasFieldOrPropertyWithValue("species", species)

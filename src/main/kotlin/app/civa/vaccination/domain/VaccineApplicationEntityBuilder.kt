@@ -2,7 +2,7 @@ package app.civa.vaccination.domain
 
 import java.util.*
 
-class VaccineApplicationBuilderImpl : VaccineApplicationBuilder {
+class VaccineApplicationEntityBuilder : VaccineApplicationBuilder {
 
     override lateinit var id: UUID
     override lateinit var vaccine: Vaccine
