@@ -1,40 +1,28 @@
 package app.civa.vaccination.domain
 
-import java.time.Year
-import java.time.format.DateTimeFormatter
-
 class Batch
-private constructor(private val number: String, private val year: Year) {
+private constructor(
+    private val prefix: String,
+    private val suffix: String
+) {
 
     val value: String
-        get() = "$number/${year.format(yearDigit)}"
+        get() = "$prefix/$suffix"
 
     companion object {
 
-        private val yearDigit = DateTimeFormatter.ofPattern("yy")
+        // Batch pattern: 081/22
+        private val pattern = Regex("\\d{3}/\\d{2}")
 
-        fun from(value: String): Batch {
-            mustMatchRegex(value)
+        infix fun from(value: String): Batch {
+            value mustMatch pattern
 
             val (prefix, suffix) = value.split("/")
-            val year = Year.parse("20${suffix}")
-
-            return Batch(prefix, year)
-        }
-
-        private fun regexMatches(value: String) =
-            value.matches(Regex("\\d{3}/\\d{2}"))
-
-        private fun mustMatchRegex(value: String) {
-            when (regexMatches(value)) {
-                false -> throw IllegalArgumentException()
-            }
+            return Batch(prefix, suffix)
         }
     }
 
-    override fun toString(): String {
-        return "Batch(number='$number', year=$year)"
-    }
+    override fun toString() = "Batch(prefix='$prefix', suffix='$suffix')"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -42,17 +30,17 @@ private constructor(private val number: String, private val year: Year) {
 
         other as Batch
         return when {
-            number != other.number -> false
-            year != other.year -> false
+            prefix != other.prefix -> false
+            suffix != other.suffix -> false
             else -> true
         }
     }
 
-    override fun hashCode(): Int {
-        var result = number.hashCode()
-        result = 31 * result + year.hashCode()
-        return result
-    }
-
+    override fun hashCode() = prefix.hashCode() * 31 + suffix.hashCode()
 }
 
+private infix fun String.mustMatch(pattern: Regex) {
+    when (this matches pattern) {
+        false -> throw IllegalArgumentException()
+    }
+}
