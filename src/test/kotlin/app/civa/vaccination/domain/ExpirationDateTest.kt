@@ -5,8 +5,11 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
+import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.MONTHS
 
 @DisplayName("Expiration Date should")
 internal class ExpirationDateTest {
@@ -15,8 +18,13 @@ internal class ExpirationDateTest {
     @DisplayName("not throw any exception when date is after now")
     fun shouldNotThrowExceptionWhenItsValid() {
         assertThatCode {
-            ExpirationDate(LocalDate.now(UTC).plusMonths(6))
-                .mustBeValid()
+            val date = ExpirationDate of LocalDate.now(UTC).plusMonths(6)
+            date.mustBeValid()
+        }.doesNotThrowAnyException()
+
+        assertThatCode {
+            val date = ExpirationDate from Duration.of(6, MONTHS)
+            date.mustBeValid()
         }.doesNotThrowAnyException()
     }
 
@@ -24,8 +32,8 @@ internal class ExpirationDateTest {
     @DisplayName("throw IllegalStateException when date is before now")
     fun shouldThrowExceptionWhenItsExpired() {
         assertThatThrownBy {
-            ExpirationDate(LocalDate.now(UTC).minusDays(1))
-                .mustBeValid()
+            val date = ExpirationDate of LocalDate.now(UTC).minusDays(1)
+            date.mustBeValid()
         }.isExactlyInstanceOf(IllegalStateException::class.java)
             .hasMessage(VACCINE_EXPIRED)
     }

@@ -1,29 +1,32 @@
 package app.civa.vaccination.domain
 
+import java.time.Duration
 import java.time.LocalDate
-import java.time.Month
-import java.time.ZoneOffset
+import java.time.ZoneOffset.UTC
 
 class ExpirationDate
-constructor(private val value: LocalDate) {
+private constructor(
+    private val value: LocalDate
+) {
 
     companion object {
 
         const val VACCINE_EXPIRED = "Vaccine has expired"
 
-        fun of(day: Int, month: Month, year: Int): ExpirationDate {
-            return ExpirationDate(LocalDate.of(year, month, day))
-        }
+        infix fun of(date: LocalDate) = ExpirationDate(date)
+
+        infix fun from(duration: Duration) = ExpirationDate(
+            LocalDate.now(UTC).plus(duration))
     }
 
     private fun hasExpired(): Boolean {
-        val today = LocalDate.now(ZoneOffset.UTC)
+        val today = LocalDate.now(UTC)
         return value.isBefore(today)
     }
 
     fun mustBeValid() {
-        when {
-            hasExpired() -> throw IllegalStateException(VACCINE_EXPIRED)
+        when (this.hasExpired()) {
+            true -> throw IllegalStateException(VACCINE_EXPIRED)
         }
     }
 
