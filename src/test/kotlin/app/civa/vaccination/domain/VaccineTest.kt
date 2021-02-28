@@ -32,18 +32,11 @@ internal class VaccineTest {
         }
 
         @Test
-        @DisplayName("match according to species")
-        fun match() {
-            assertThat(vaccine.matches(Species.FELINE)).isTrue
-            assertThat(vaccine.matches(Species.CANINE)).isTrue
-        }
-
-        @Test
         @DisplayName("not throw IllegalStateException when species match")
         fun mustMatchSpecies() {
             assertThatCode {
-                vaccine.mustMatchSpecies(Species.FELINE)
-                vaccine.mustMatchSpecies(Species.CANINE)
+                vaccine mustMatch Species.FELINE
+                vaccine mustMatch Species.CANINE
             }.doesNotThrowAnyException()
         }
     }
@@ -69,19 +62,12 @@ internal class VaccineTest {
         }
 
         @Test
-        @DisplayName("match according to species")
-        fun match() {
-            assertThat(vaccine.matches(Species.CANINE)).isTrue
-            assertThat(vaccine.matches(Species.FELINE)).isFalse
-        }
-
-        @Test
         @DisplayName("throw IllegalStateException when species doesnt match")
         fun mustMatchSpecies() {
-            assertThatCode { vaccine.mustMatchSpecies(Species.CANINE) }
+            assertThatCode { vaccine mustMatch Species.CANINE }
                 .doesNotThrowAnyException()
 
-            assertThatThrownBy { vaccine.mustMatchSpecies(Species.FELINE) }
+            assertThatThrownBy { vaccine mustMatch Species.FELINE }
                 .isInstanceOf(IllegalStateException::class.java)
                 .hasMessage("Species doesn't match vaccine's species")
         }

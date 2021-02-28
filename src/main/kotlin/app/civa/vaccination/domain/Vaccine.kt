@@ -1,7 +1,5 @@
 package app.civa.vaccination.domain
 
-import java.util.function.Consumer
-
 class Vaccine(
     private val species: Collection<Species>,
     private val name: String,
@@ -25,7 +23,7 @@ class Vaccine(
         builder.expirationDate
     )
 
-    fun accept(visitor: VaccineVisitor) {
+    infix fun accept(visitor: VaccineVisitor) {
         visitor.seeSpecies(species)
         visitor.seeName(name)
         visitor.seeCommercialName(commercialName)
@@ -34,17 +32,16 @@ class Vaccine(
         visitor.seeExpirationDate(expirationDate)
     }
 
-    fun accept(consumer: Consumer<String>) = consumer.accept(name)
-
     fun mustBeValid() = expirationDate.mustBeValid()
 
-    fun matches(species: Species) = this.species.contains(species)
-
-    fun mustMatchSpecies(species: Species) {
-        when (matches(species)) {
+    infix fun mustMatch(species: Species) {
+        when (this.species matches species) {
             false -> throw IllegalStateException(SPECIES_DOESNT_MATCH)
         }
     }
+
+    infix fun pairNameWith(application: VaccineApplication) =
+        this.name to application
 
     override fun equals(other: Any?) =
         (other is Vaccine)
