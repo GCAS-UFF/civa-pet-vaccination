@@ -48,11 +48,7 @@ class Vaccine(
         && species == other.species
         && name == other.name
 
-    override fun hashCode(): Int {
-        var result = species.hashCode()
-        result = 31 * result + name.hashCode()
-        return result
-    }
+    override fun hashCode() = 31 * species.hashCode() + name.hashCode()
 
     override fun toString() =
         "Vaccine(species=$species,  " +
