@@ -10,6 +10,9 @@ private constructor(
     private val applications: Applications
 ) {
 
+    val size: Int
+        get() = applications.countAll()
+
     constructor(petID: UUID, species: Species) : this(
         UUID.randomUUID(),
         petID,
@@ -31,17 +34,20 @@ private constructor(
         visitor.seeApplications(applications)
     }
 
-    fun addApplication(application: VaccineApplication) {
-        application.mustMatchSpecies(species)
-        applications.addEntry(application)
-    }
+    infix fun add(application: VaccineApplication) =
+        applications add application.mustMatch(species)
 
-    fun removeApplicationById(applicationId: UUID) =
-        applications.deleteById(applicationId)
+    infix fun removeBy(applicationId: UUID) =
+        applications deleteBy applicationId
 
-    fun findApplicationById(applicationId: UUID) =
-        applications.findById(applicationId)
+    infix fun findBy(applicationId: UUID) =
+        applications findBy applicationId
 
-    fun countAll() = applications.countAll()
+    override fun toString() =
+        "VaccinationCard(id=$id, " +
+        "petID=$petID, " +
+        "species=$species, " +
+        "applications=$applications, " +
+        "size=$size)"
 
 }

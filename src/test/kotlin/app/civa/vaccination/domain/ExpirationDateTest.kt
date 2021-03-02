@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDate
+import java.time.Period
 import java.time.ZoneOffset.UTC
 import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.MONTHS
@@ -23,7 +24,7 @@ internal class ExpirationDateTest {
         }.doesNotThrowAnyException()
 
         assertThatCode {
-            val date = ExpirationDate from Duration.of(6, MONTHS)
+            val date = ExpirationDate from Period.ofMonths(6)
             date.mustBeValid()
         }.doesNotThrowAnyException()
     }

@@ -30,7 +30,7 @@ internal class VaccineEntityBuilderTest {
                 .commercialName(commercialName)
                 .company(company)
                 .batch(batch)
-                .expirationDate(expirationDate)
+                .expirationDate(ExpirationDate of expirationDate)
                 .build()
 
             assertThat(vaccine).isNotNull
@@ -41,7 +41,7 @@ internal class VaccineEntityBuilderTest {
                 .hasFieldOrPropertyWithValue("commercialName", commercialName)
                 .hasFieldOrPropertyWithValue("company", company)
                 .hasFieldOrPropertyWithValue("batch", batch)
-                .hasFieldOrPropertyWithValue("expirationDate", ExpirationDate(expirationDate))
+                .hasFieldOrPropertyWithValue("expirationDate", ExpirationDate of expirationDate)
 
         }.doesNotThrowAnyException()
     }

@@ -1,7 +1,7 @@
 package app.civa.vaccination.domain
 
-import java.time.Duration
 import java.time.LocalDate
+import java.time.Period
 import java.time.ZoneOffset.UTC
 
 class ExpirationDate
@@ -15,8 +15,8 @@ private constructor(
 
         infix fun of(date: LocalDate) = ExpirationDate(date)
 
-        infix fun from(duration: Duration) = ExpirationDate(
-            LocalDate.now(UTC).plus(duration))
+        infix fun from(period: Period) = ExpirationDate(
+            LocalDate.now(UTC).plus(period))
     }
 
     private fun hasExpired(): Boolean {

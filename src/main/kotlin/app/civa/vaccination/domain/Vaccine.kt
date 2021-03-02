@@ -1,5 +1,7 @@
 package app.civa.vaccination.domain
 
+import java.util.*
+
 class Vaccine(
     private val species: Collection<Species>,
     private val name: String,
@@ -32,12 +34,19 @@ class Vaccine(
         visitor.seeExpirationDate(expirationDate)
     }
 
-    fun mustBeValid() = expirationDate.mustBeValid()
+    fun mustBeValid() = apply { expirationDate.mustBeValid() }
 
     infix fun mustMatch(species: Species) {
         when (this.species matches species) {
             false -> throw IllegalStateException(SPECIES_DOESNT_MATCH)
         }
+    }
+
+    fun apply(weight: PetWeight) = application {
+        id = UUID.randomUUID()
+        createdOn = ApplicationDateTime.now()
+        petWeight = weight
+        vaccine = this@Vaccine.mustBeValid()
     }
 
     infix fun pairNameWith(application: VaccineApplication) =
@@ -58,4 +67,10 @@ class Vaccine(
         "batch=$batch, " +
         "expirationDate=$expirationDate)"
 
+}
+
+fun vaccine(lambda: VaccineEntityBuilder.() -> Unit): Vaccine {
+    val builder = VaccineEntityBuilder()
+    builder.lambda()
+    return builder.build()
 }

@@ -1,8 +1,6 @@
 package app.civa.vaccination.domain
 
-import java.time.LocalDate
-
-class VaccineEntityBuilder : VaccineBuilder{
+class VaccineEntityBuilder : VaccineBuilder {
 
     override lateinit var species: Collection<Species>
     override lateinit var name: String
@@ -26,8 +24,8 @@ class VaccineEntityBuilder : VaccineBuilder{
     fun batch(batch: Batch) =
         apply { this.batch = batch }
 
-    fun expirationDate(date: LocalDate) =
-        apply { this.expirationDate = ExpirationDate(date) }
+    fun expirationDate(date: ExpirationDate) =
+        apply { this.expirationDate = date }
 
     override fun build() = Vaccine(this)
 

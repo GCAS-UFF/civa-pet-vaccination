@@ -19,10 +19,10 @@ internal class VaccineApplicationEntityBuilderTest {
             "Vanguard® Plus",
             "Zoetis",
             Batch.from("021/21"),
-            ExpirationDate(LocalDate.now(ZoneOffset.UTC).plusDays(60))
+            ExpirationDate of LocalDate.now(ZoneOffset.UTC).plusDays(60)
         )
 
-        private val petWeight = PetWeight(2.67)
+        private val petWeight = PetWeight from 2.67
         private val createdOn = ApplicationDateTime.now()
     }
 

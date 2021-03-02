@@ -6,9 +6,10 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import java.time.LocalDate
+import java.time.Duration
 import java.time.Month.AUGUST
-import java.time.ZoneOffset
+import java.time.Period
+import java.time.temporal.ChronoUnit.MONTHS
 
 @DisplayName("Vaccine application should")
 internal class VaccineApplicationTest {
@@ -21,24 +22,23 @@ internal class VaccineApplicationTest {
             "Nobivac® Raiva",
             "MSD",
             Batch.from("200/21"),
-            ExpirationDate(LocalDate.now(ZoneOffset.UTC).plusMonths(6))
+            ExpirationDate from Period.ofMonths(6)
         )
 
-        private val petWeight = PetWeight(4.67)
+        private val petWeight = PetWeight from 4.67
     }
-
 
     @Test
     @DisplayName("be created successfully when input is valid")
     fun createSuccessfully() {
-        assertThatCode { VaccineApplication(vaccine, petWeight) }
+        assertThatCode { vaccine.apply(petWeight) }
             .doesNotThrowAnyException()
     }
 
     @Test
     @DisplayName("throw exception when pet weight fails validation")
     fun exceptionWhenPetWeightIsWrong() {
-        assertThatThrownBy { VaccineApplication(vaccine, PetWeight(0.0)) }
+        assertThatThrownBy { vaccine.apply(PetWeight from 0.0) }
             .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("Pet weight must be positive: 0 (ZERO) or greater")
     }
@@ -47,7 +47,7 @@ internal class VaccineApplicationTest {
     @DisplayName("Equals")
     inner class Equals {
 
-        private val applicationToday = VaccineApplication(vaccine, petWeight)
+        private val applicationToday = vaccine.apply(petWeight)
 
         @BeforeEach
         fun setup() {
@@ -60,7 +60,7 @@ internal class VaccineApplicationTest {
         @Test
         @DisplayName("when it happens on the same day")
         fun isEqualWhenSame() {
-            val applicationSame = VaccineApplication(vaccine, petWeight)
+            val applicationSame = vaccine.apply(petWeight)
 
             ReflectionTestUtils.setField(
                 applicationSame, "createdOn",
@@ -73,7 +73,7 @@ internal class VaccineApplicationTest {
         @Test
         @DisplayName("when it happens before now")
         fun isEqualWhenBefore() {
-            val applicationBefore = VaccineApplication(vaccine, petWeight)
+            val applicationBefore = vaccine.apply(petWeight)
 
             ReflectionTestUtils.setField(
                 applicationBefore, "createdOn",
@@ -86,7 +86,7 @@ internal class VaccineApplicationTest {
         @Test
         @DisplayName("when it happens during interval")
         fun isEqualWhenInterval() {
-            val applicationInterval = VaccineApplication(vaccine, petWeight)
+            val applicationInterval = vaccine.apply(petWeight)
 
             ReflectionTestUtils.setField(
                 applicationInterval, "createdOn",
@@ -99,7 +99,7 @@ internal class VaccineApplicationTest {
         @Test
         @DisplayName("not when it happens after interval")
         fun isNotEqualWhenValid() {
-            val applicationValid = VaccineApplication(vaccine, petWeight)
+            val applicationValid = vaccine.apply(petWeight)
 
             ReflectionTestUtils.setField(
                 applicationValid, "createdOn",
