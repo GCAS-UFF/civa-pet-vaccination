@@ -27,10 +27,10 @@ private constructor(
     fun toPair() = vaccine pairNameWith this
 
     infix fun mustMatch(species: Species) =
-        apply {  vaccine.mustMatch(species) }
+        apply { vaccine mustMatch species }
 
     infix fun mapStatusFrom(other: VaccineApplication) =
-        createdOn.mapStatusFrom(other.createdOn)
+        createdOn mapStatusFrom other.createdOn
 
     infix fun happenedRecentlyIn(applications: Collection<VaccineApplication>?) =
         applications?.any { it == this }

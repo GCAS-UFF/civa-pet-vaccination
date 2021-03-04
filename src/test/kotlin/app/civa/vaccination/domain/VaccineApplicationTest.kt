@@ -16,14 +16,7 @@ internal class VaccineApplicationTest {
 
     companion object {
 
-        private val vaccine = Vaccine(
-            setOf(Species.FELINE, Species.CANINE),
-            "Antirrábica",
-            "Nobivac® Raiva",
-            "MSD",
-            Batch.from("200/21"),
-            ExpirationDate from Period.ofMonths(6)
-        )
+        private val vaccine = ValidVaccine.msdVaccine
 
         private val petWeight = PetWeight from 4.67
     }

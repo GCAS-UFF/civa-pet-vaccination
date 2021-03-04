@@ -43,4 +43,6 @@ private constructor(
 
     override fun hashCode() = value.hashCode()
 
+    override fun toString() = "ExpirationDate(value=$value)"
+
 }

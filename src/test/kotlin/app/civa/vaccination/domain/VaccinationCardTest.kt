@@ -15,12 +15,19 @@ internal class VaccinationCardTest {
     companion object {
 
         private val vaccine = vaccine {
-            species = setOf(Species.FELINE, Species.CANINE)
-            name = "Antirrábica"
-            commercialName = "Nobivac® Raiva"
-            company = "MSD"
-            batch = Batch from "200/21"
-            expirationDate = ExpirationDate from Period.ofMonths(6)
+            name = name {
+                classification = "Antirrábica"
+                commercial = "Nobivac® Raiva"
+            }
+            efficacy = efficacy {
+                species = setOf(Species.FELINE, Species.CANINE)
+                agents = setOf("Raiva")
+            }
+            fabrication = fabrication {
+                company = "MSD"
+                batch = Batch from "200/21"
+                expirationDate = ExpirationDate from Period.ofMonths(6)
+            }
         }
 
         private val petWeight = PetWeight from 4.67

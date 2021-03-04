@@ -15,17 +15,9 @@ internal class VaccineTest {
 
     @Nested
     @DisplayName("when Expired")
-    inner class ExpiredVaccine {
+    inner class ExpiredVaccineTest {
 
-        private val vaccine = vaccine {
-            species = setOf(CANINE, FELINE)
-            name = "Antirrábica"
-            commercialName = "Nobivac® Raiva"
-            company = "MSD"
-            batch = Batch from "002/20"
-            expirationDate = ExpirationDate of LocalDate.now(UTC).minusDays(1)
-        }
-
+        private val vaccine = ExpiredVaccine.msdVaccine
 
         @Test
         @DisplayName("throw IllegalStateException")
@@ -47,16 +39,9 @@ internal class VaccineTest {
 
     @Nested
     @DisplayName("when Valid")
-    inner class CanineValidVaccine {
+    inner class CanineValidVaccineTest {
 
-        private val vaccine = vaccine {
-            species = setOf(CANINE)
-            name = "Múltipla V10"
-            commercialName = "Vanguard® Plus"
-            company = "Zoetis"
-            batch = Batch from "021/21"
-            expirationDate = ExpirationDate from Period.ofDays(60)
-        }
+        private val vaccine = ValidVaccine.zoetisVaccine
 
         @Test
         @DisplayName("not throw any exception when is valid")
@@ -82,12 +67,19 @@ internal class VaccineTest {
             assertThat(vaccine)
                 .isEqualTo(
                     vaccine {
-                        species = setOf(CANINE)
-                        name = "Múltipla V10"
-                        commercialName = "Fake®"
-                        company = "Fake"
-                        batch = Batch from "021/21"
-                        expirationDate = ExpirationDate from Period.ofDays(60)
+                        name = name {
+                            classification = "Múltipla V10"
+                            commercial = "Fake®"
+                        }
+                        efficacy = efficacy {
+                            species = setOf(CANINE)
+                            agents = setOf("Fake 1", "Fake 2")
+                        }
+                        fabrication = fabrication {
+                            company = "Zoetis"
+                            batch = Batch from "021/21"
+                            expirationDate = ExpirationDate from Period.ofDays(60)
+                        }
                     }
                 )
         }
@@ -98,12 +90,19 @@ internal class VaccineTest {
             assertThat(vaccine)
                 .isNotEqualTo(
                     vaccine {
-                        species = setOf(FELINE)
-                        name = "Múltipla V10"
-                        commercialName = "Vanguard® Plus"
-                        company = "Zoetis"
-                        batch = Batch from "021/21"
-                        expirationDate = ExpirationDate from Period.ofDays(60)
+                        name = name {
+                            classification = "Múltipla V10"
+                            commercial = "Fake®"
+                        }
+                        efficacy = efficacy {
+                            species = setOf(FELINE)
+                            agents = setOf("Fake 1", "Fake 2")
+                        }
+                        fabrication = fabrication {
+                            company = "MSD"
+                            batch = Batch from "021/21"
+                            expirationDate = ExpirationDate from Period.ofDays(60)
+                        }
                     }
                 )
         }
@@ -114,12 +113,19 @@ internal class VaccineTest {
             assertThat(vaccine)
                 .isNotEqualTo(
                     vaccine {
-                        species = setOf(FELINE)
-                        name = "Múltipla V8"
-                        commercialName = "Vanguard® HTLP 5 CV-L"
-                        company = "Zoetis"
-                        batch = Batch from "021/21"
-                        expirationDate = ExpirationDate from Period.ofDays(60)
+                        name = name {
+                            classification = "Múltipla V8"
+                            commercial = "Vanguard® HTLP 5 CV-L"
+                        }
+                        efficacy = efficacy {
+                            species = setOf(FELINE)
+                            agents = setOf("Fake 1", "Fake 2")
+                        }
+                        fabrication = fabrication {
+                            company = "MSD"
+                            batch = Batch from "021/21"
+                            expirationDate = ExpirationDate from Period.ofDays(60)
+                        }
                     }
                 )
         }
