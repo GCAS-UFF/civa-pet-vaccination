@@ -50,6 +50,7 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
             ?.mapStatusFrom(application)
 
         throw IllegalApplicationException from status
+
     }
 
     private fun mergeEntry(vaccineName: String, application: VaccineApplication) =
