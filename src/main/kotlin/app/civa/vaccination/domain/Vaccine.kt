@@ -1,68 +1,61 @@
 package app.civa.vaccination.domain
 
-import java.util.function.Consumer
+import java.util.*
 
-class Vaccine(
-    private val species: Collection<Species>,
-    private val name: String,
-    private val commercialName: String,
-    private val company: String,
-    private val batch: Batch,
-    private val expirationDate: ExpirationDate
+class Vaccine
+private constructor(
+    private val name: Name,
+    private val efficacy: Efficacy,
+    private val fabrication: Fabrication
 ) {
 
-    companion object {
-
-        const val SPECIES_DOESNT_MATCH = "Species doesn't match vaccine's species"
-    }
-
     constructor(builder: VaccineBuilder) : this(
-        builder.species,
         builder.name,
-        builder.commercialName,
-        builder.company,
-        builder.batch,
-        builder.expirationDate
+        builder.efficacy,
+        builder.fabrication
     )
 
-    fun accept(visitor: VaccineVisitor) {
-        visitor.seeSpecies(species)
+    infix fun accept(visitor: VaccineVisitor) {
         visitor.seeName(name)
-        visitor.seeCommercialName(commercialName)
-        visitor.seeCompany(company)
-        visitor.seeBatch(batch)
-        visitor.seeExpirationDate(expirationDate)
+        visitor.seeEfficacy(efficacy)
+        visitor.seeFabrication(fabrication)
     }
 
-    fun accept(consumer: Consumer<String>) = consumer.accept(name)
+    infix fun pairNameWith(application: VaccineApplication) =
+        name pairWith application
 
-    fun mustBeValid() = expirationDate.mustBeValid()
+    infix fun mustMatch(species: Species) =
+        efficacy mustMatch species
 
-    fun matches(species: Species) = this.species.contains(species)
+    fun mustBeValid() = apply { fabrication.mustBeValid() }
 
-    fun mustMatchSpecies(species: Species) {
-        when (matches(species)) {
-            false -> throw IllegalStateException(SPECIES_DOESNT_MATCH)
-        }
+    fun apply(weight: PetWeight) = application {
+        id = UUID.randomUUID()
+        createdOn = ApplicationDateTime.now()
+        petWeight = weight
+        vaccine = this@Vaccine.mustBeValid()
     }
 
-    override fun equals(other: Any?) =
-        (other is Vaccine)
-        && species == other.species
-        && name == other.name
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-    override fun hashCode(): Int {
-        var result = species.hashCode()
-        result = 31 * result + name.hashCode()
-        return result
+        other as Vaccine
+
+        if (name != other.name) return false
+        if (efficacy != other.efficacy) return false
+        if (fabrication != other.fabrication) return false
+
+        return true
     }
 
-    override fun toString() =
-        "Vaccine(species=$species,  " +
-        "name='$name', " +
-        "commercialName='$commercialName', " +
-        "company='$company', " +
-        "batch=$batch, " +
-        "expirationDate=$expirationDate)"
+    override fun hashCode() =
+        31 * (31 * name.hashCode() + efficacy.hashCode()) + fabrication.hashCode()
 
+}
+
+fun vaccine(lambda: VaccineBuilder.() -> Unit): Vaccine {
+    val builder = VaccineEntityBuilder()
+    builder.lambda()
+    return builder.build()
 }

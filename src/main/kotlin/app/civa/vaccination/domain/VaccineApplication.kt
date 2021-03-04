@@ -10,15 +10,6 @@ private constructor(
     private val createdOn: ApplicationDateTime
 ) {
 
-    constructor(vaccine: Vaccine, petWeight: PetWeight) : this(
-        UUID.randomUUID(),
-        vaccine,
-        petWeight,
-        ApplicationDateTime.now()
-    ) {
-        vaccine.mustBeValid()
-    }
-
     constructor(builder: VaccineApplicationBuilder) : this(
         builder.id,
         builder.vaccine,
@@ -26,26 +17,23 @@ private constructor(
         builder.createdOn
     )
 
-    fun accept(visitor: VaccineApplicationVisitor) {
+    infix fun accept(visitor: VaccineApplicationVisitor) {
         visitor.seeId(id)
         visitor.seeVaccine(vaccine)
         visitor.seePetWeight(petWeight)
         visitor.seeCreatedOn(createdOn)
     }
 
-    fun toPair(): Pair<String, VaccineApplication> {
-        val builder = StringBuilder()
-        vaccine.accept { builder.append(it) }
-        val vaccineName = builder.toString()
+    fun toPair() = vaccine pairNameWith this
 
-        return vaccineName to this
-    }
+    infix fun mustMatch(species: Species) =
+        apply { vaccine mustMatch species }
 
-    fun mustMatchSpecies(species: Species) =
-        vaccine.mustMatchSpecies(species)
+    infix fun mapStatusFrom(other: VaccineApplication) =
+        createdOn mapStatusFrom other.createdOn
 
-    fun mapStatus(other: VaccineApplication) =
-        createdOn.mapStatus(other.createdOn)
+    infix fun happenedRecentlyIn(applications: Collection<VaccineApplication>?) =
+        applications?.any { it == this }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -71,4 +59,10 @@ private constructor(
         "petWeight=$petWeight, " +
         "createdOn=$createdOn)"
 
+}
+
+fun application(lambda: VaccineApplicationEntityBuilder.() -> Unit): VaccineApplication {
+    val builder = VaccineApplicationEntityBuilder()
+    builder.lambda()
+    return builder.build()
 }

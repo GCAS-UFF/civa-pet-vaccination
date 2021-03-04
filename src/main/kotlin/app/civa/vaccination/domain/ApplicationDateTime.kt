@@ -7,7 +7,7 @@ import java.time.ZoneOffset.UTC
 import java.time.temporal.ChronoUnit.DAYS
 
 class ApplicationDateTime
-private constructor(private val value: LocalDateTime) {
+constructor(private val value: LocalDateTime) {
 
     companion object {
 
@@ -19,7 +19,7 @@ private constructor(private val value: LocalDateTime) {
             ApplicationDateTime(LocalDateTime.of(year, month, day, hour, minute))
     }
 
-    fun mapStatus(other: ApplicationDateTime): DateTimeStatus {
+    infix fun mapStatusFrom(other: ApplicationDateTime): DateTimeStatus {
         val otherTime = other.value.truncatedTo(DAYS)
         val thisTime = value.truncatedTo(DAYS)
 
@@ -37,17 +37,14 @@ private constructor(private val value: LocalDateTime) {
         if (javaClass != other?.javaClass) return false
 
         other as ApplicationDateTime
-
-        return when (mapStatus(other)) {
+        return when (this mapStatusFrom other) {
             VALID -> false
             else -> true
         }
     }
 
-    override fun hashCode() = value.hashCode()
+    override fun hashCode() = value.truncatedTo(DAYS).hashCode()
 
-    override fun toString(): String {
-        return "ApplicationDateTime(value=$value)"
-    }
+    override fun toString() = "ApplicationDateTime(value=$value)"
 
 }

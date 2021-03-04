@@ -2,7 +2,7 @@ package app.civa.vaccination.domain
 
 import java.util.*
 
-interface VaccinationCardBuilder {
+interface VaccinationCardBuilder : Builder<VaccinationCard>{
 
     val id: UUID
     val petId: UUID

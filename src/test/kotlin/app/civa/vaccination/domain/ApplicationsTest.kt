@@ -6,36 +6,49 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import java.time.LocalDate
 import java.time.Month.AUGUST
-import java.time.ZoneOffset
+import java.time.Period
 
 @DisplayName("Applications should")
 internal class ApplicationsTest {
 
     companion object {
 
-        private val msdVaccine = Vaccine(
-            setOf(Species.FELINE, Species.CANINE),
-            "Antirrábica",
-            "Nobivac® Raiva",
-            "MSD",
-            Batch.from("012/22"),
-            ExpirationDate(LocalDate.now(ZoneOffset.UTC).plusMonths(6))
-        )
+        private val msdVaccine = vaccine {
+            name = name {
+                classification = "Antirrábica"
+                commercial = "Nobivac® Raiva"
+            }
+            efficacy = efficacy {
+                species = setOf(Species.CANINE, Species.FELINE)
+                agents = setOf("Raiva")
+            }
+            fabrication = fabrication {
+                company = "MSD"
+                batch = Batch from "012/22"
+                expirationDate = ExpirationDate from Period.ofMonths(6)
+            }
+        }
 
-        private val zoetisVaccine = Vaccine(
-            setOf(Species.CANINE),
-            "Múltipla V10",
-            "Vanguard® Plus",
-            "Zoetis",
-            Batch.from("202/01"),
-            ExpirationDate(LocalDate.now(ZoneOffset.UTC).plusDays(60))
-        )
+        private val zoetisVaccine =  vaccine {
+            name = name {
+                classification = "Múltipla V10"
+                commercial = "Vanguard® Plus"
+            }
+            efficacy = efficacy {
+                species = setOf(Species.CANINE)
+                agents = setOf("1", "2", "3")
+            }
+            fabrication = fabrication {
+                company = "Zoetis"
+                batch = Batch from "202/01"
+                expirationDate =  ExpirationDate from Period.ofMonths(1)
+            }
+        }
 
-        private val petWeight = PetWeight(2.64)
+        private val petWeight = PetWeight from 2.64
 
-        private val application = VaccineApplication(zoetisVaccine, petWeight)
+        private val application = zoetisVaccine.apply(petWeight)
     }
 
     @BeforeEach
@@ -55,11 +68,11 @@ internal class ApplicationsTest {
         @DisplayName("successfully when vaccine name is different")
         fun shouldAddApplicationWhenNameIsDifferent() {
             val applications = Applications()
-            val newApplication = VaccineApplication(msdVaccine, petWeight)
+            val anotherApplication = msdVaccine.apply(petWeight)
 
             assertThatCode {
-                applications.addEntry(application)
-                applications.addEntry(newApplication)
+                applications add application
+                applications add anotherApplication
             }.doesNotThrowAnyException()
 
             assertThat(applications)
@@ -70,7 +83,7 @@ internal class ApplicationsTest {
             assertThat(applications["Antirrábica"])
                 .isNotNull
                 .isNotEmpty
-                .contains(newApplication)
+                .contains(anotherApplication)
                 .size().isEqualTo(1)
 
             assertThat(applications["Múltipla V10"])
@@ -85,16 +98,16 @@ internal class ApplicationsTest {
         fun shouldAddApplicationWhenCreatedOnIsDifferent() {
             val applications = Applications()
 
-            val newApplication = VaccineApplication(zoetisVaccine, petWeight)
+            val anotherApplication = zoetisVaccine.apply(petWeight)
             ReflectionTestUtils.setField(
-                newApplication,
+                anotherApplication,
                 "createdOn",
                 ApplicationDateTime.of(20, AUGUST, 2021, 10, 0)
             )
 
             assertThatCode {
-                applications.addEntry(application)
-                applications.addEntry(newApplication)
+                applications add application
+                applications add anotherApplication
             }.doesNotThrowAnyException()
 
             assertThat(applications)
@@ -105,7 +118,7 @@ internal class ApplicationsTest {
             assertThat(applications["Múltipla V10"])
                 .isNotNull
                 .isNotEmpty
-                .contains(application, newApplication)
+                .contains(application, anotherApplication)
                 .size().isEqualTo(2)
         }
 
@@ -115,8 +128,8 @@ internal class ApplicationsTest {
             val applications = Applications()
 
             assertThatThrownBy {
-                applications.addEntry(application)
-                applications.addEntry(application)
+                applications add application
+                applications add application
             }.isExactlyInstanceOf(IllegalApplicationException::class.java)
                 .isInstanceOf(IllegalArgumentException::class.java)
                 .hasMessage("Provided application already added. Status=SAME")
@@ -137,17 +150,17 @@ internal class ApplicationsTest {
         @DisplayName("throw exception when application is before today")
         fun shouldNotAddApplicationWhenItsStatusIsBefore() {
             val applications = Applications()
+            val anotherApplication = zoetisVaccine.apply(petWeight)
 
-            val newApplication = VaccineApplication(zoetisVaccine, petWeight)
             ReflectionTestUtils.setField(
-                newApplication,
+                anotherApplication,
                 "createdOn",
                 ApplicationDateTime.of(9, AUGUST, 2021, 10, 0)
             )
 
             assertThatThrownBy {
-                applications.addEntry(application)
-                applications.addEntry(newApplication)
+                applications add application
+                applications add anotherApplication
             }.isExactlyInstanceOf(IllegalApplicationException::class.java)
                 .isInstanceOf(IllegalArgumentException::class.java)
                 .hasMessage("Provided application is before today. Status=BEFORE")
@@ -168,17 +181,17 @@ internal class ApplicationsTest {
         @DisplayName("throw exception when application is before interval")
         fun shouldNotAddApplicationWhenItsStatusIsInterval() {
             val applications = Applications()
+            val anotherApplication = zoetisVaccine.apply(petWeight)
 
-            val newApplicationMock = VaccineApplication(zoetisVaccine, petWeight)
             ReflectionTestUtils.setField(
-                newApplicationMock,
+                anotherApplication,
                 "createdOn",
                 ApplicationDateTime.of(15, AUGUST, 2021, 10, 0)
             )
 
             assertThatThrownBy {
-                applications.addEntry(application)
-                applications.addEntry(newApplicationMock)
+                applications add application
+                applications add anotherApplication
             }.isExactlyInstanceOf(IllegalApplicationException::class.java)
                 .isInstanceOf(IllegalArgumentException::class.java)
                 .hasMessage("Provided application cannot be added today. Status=INTERVAL")
@@ -204,14 +217,14 @@ internal class ApplicationsTest {
         @DisplayName("successfully by id when its found")
         fun shouldRemoveApplicationById() {
             val applications = Applications()
-            val newApplication = VaccineApplication(msdVaccine, petWeight)
+            val newApplication = msdVaccine.apply(petWeight)
 
             assertThatCode {
-                applications.addEntry(application)
-                applications.addEntry(newApplication)
+                applications add application
+                applications add newApplication
             }.doesNotThrowAnyException()
 
-            assertThatCode { applications.deleteById(application.id) }
+            assertThatCode { applications deleteBy application.id }
                 .doesNotThrowAnyException()
 
             assertThat(applications["Múltipla V10"]).isNull()
@@ -237,7 +250,7 @@ internal class ApplicationsTest {
                 .isNotNull
                 .isEmpty()
 
-            assertThatThrownBy { applications.deleteById(application.id) }
+            assertThatThrownBy { applications deleteBy application.id }
                 .isExactlyInstanceOf(NoSuchElementException::class.java)
                 .isInstanceOf(RuntimeException::class.java)
                 .hasMessage("Vaccine Application not found")
@@ -257,11 +270,10 @@ internal class ApplicationsTest {
         fun shouldFindById() {
             val applications = Applications()
 
-            assertThatCode { applications.addEntry(application) }
-                .doesNotThrowAnyException()
-
-            assertThatCode { applications.findById(application.id) }
-                .doesNotThrowAnyException()
+            assertThatCode {
+                applications add application
+                applications findBy application.id
+            }.doesNotThrowAnyException()
 
             assertThat(applications)
                 .isNotNull
@@ -285,7 +297,7 @@ internal class ApplicationsTest {
                 .isEmpty()
 
             assertThatCode {
-                val entry = applications.findById(application.id)
+                val entry = applications findBy application.id
                 assertThat(entry).isNull()
             }.doesNotThrowAnyException()
 
@@ -299,11 +311,11 @@ internal class ApplicationsTest {
     @DisplayName("successfully count all applications")
     fun shouldCountAll() {
         val applications = Applications()
-        val newApplication = VaccineApplication(msdVaccine, petWeight)
+        val newApplication = msdVaccine.apply(petWeight)
 
         assertThatCode {
-            applications.addEntry(application)
-            applications.addEntry(newApplication)
+            applications add application
+            applications add newApplication
         }.doesNotThrowAnyException()
 
         assertThat(applications.countAll()).isEqualTo(2)

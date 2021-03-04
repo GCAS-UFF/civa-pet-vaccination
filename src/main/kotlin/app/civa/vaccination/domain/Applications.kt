@@ -4,63 +4,60 @@ import java.util.*
 import kotlin.NoSuchElementException
 
 class Applications : HashMap<String, Collection<VaccineApplication>>() {
+
     companion object {
 
         const val APPLICATION_NOT_FOUND = "Vaccine Application not found"
     }
 
-    fun addEntry(entry: VaccineApplication) {
+    infix fun add(entry: VaccineApplication) {
         val (vaccineName, application) = entry.toPair()
 
-        when (this[vaccineName]?.any { it == application }) {
+        when (application happenedRecentlyIn this[vaccineName]) {
             true -> handleException(vaccineName, application)
             else -> mergeEntry(vaccineName, application)
         }
     }
 
-    fun findById(applicationId: UUID): VaccineApplication? {
+    infix fun findBy(applicationId: UUID): VaccineApplication? {
         return this.flatMap { it.value }
             .firstOrNull { it.id == applicationId }
     }
 
-    fun deleteById(applicationId: UUID) {
-        when (val entry = this.findById(applicationId)) {
+    infix fun deleteBy(applicationId: UUID) {
+        when (val entry = this findBy applicationId) {
             null -> throw NoSuchElementException(APPLICATION_NOT_FOUND)
-            else -> deleteApplication(entry)
+            else -> this delete entry
         }
     }
 
     fun countAll() = this.flatMap { it.value }.count()
 
-    private fun deleteApplication(entry: VaccineApplication) {
+    private infix fun delete(entry: VaccineApplication) {
         val (vaccineName, application) = entry.toPair()
 
-        val filteredSet = this[vaccineName]!!
-            .filter { it.id != application.id }
-            .toSet()
+        val filteredApplications = this[vaccineName] minus application
 
-        when (filteredSet.size) {
+        when (filteredApplications.size) {
             0 -> this.remove(vaccineName)
-            else -> this[vaccineName] = filteredSet
+            else -> this[vaccineName] = filteredApplications
         }
     }
 
     private fun handleException(name: String, application: VaccineApplication) {
         val status = this[name]
             ?.lastOrNull { it == application }
-            ?.mapStatus(application)
+            ?.mapStatusFrom(application)
 
-        when (status) {
-            null -> throw BusinessException()
-            else -> throw IllegalApplicationException(status)
-        }
+        throw IllegalApplicationException from status
     }
 
     private fun mergeEntry(vaccineName: String, application: VaccineApplication) =
         this.merge(vaccineName, listOf(application)) { a, b -> a + b }
 
-    override fun toString(): String {
-        return "Applications(applications=${this.entries})"
-    }
+    override fun toString() = "Applications(applications=${this.entries})"
 
 }
+
+infix fun Collection<VaccineApplication>?.minus(application: VaccineApplication) =
+    this!!.filter { it.id != application.id }

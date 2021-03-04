@@ -5,9 +5,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.test.util.ReflectionTestUtils
-import java.time.LocalDate
 import java.time.Month.AUGUST
-import java.time.ZoneOffset
+import java.time.Period
 import java.util.*
 
 @DisplayName("Vaccination Card")
@@ -15,18 +14,25 @@ internal class VaccinationCardTest {
 
     companion object {
 
-        private val vaccine = Vaccine(
-            setOf(Species.FELINE, Species.CANINE),
-            "Antirrábica",
-            "Nobivac® Raiva",
-            "MSD",
-            Batch.from("200/21"),
-            ExpirationDate(LocalDate.now(ZoneOffset.UTC).plusMonths(6))
-        )
+        private val vaccine = vaccine {
+            name = name {
+                classification = "Antirrábica"
+                commercial = "Nobivac® Raiva"
+            }
+            efficacy = efficacy {
+                species = setOf(Species.FELINE, Species.CANINE)
+                agents = setOf("Raiva")
+            }
+            fabrication = fabrication {
+                company = "MSD"
+                batch = Batch from "200/21"
+                expirationDate = ExpirationDate from Period.ofMonths(6)
+            }
+        }
 
-        private val petWeight = PetWeight(4.67)
+        private val petWeight = PetWeight from 4.67
 
-        private val application = VaccineApplication(vaccine, petWeight)
+        private val application = vaccine.apply(petWeight)
     }
 
     @BeforeEach
@@ -48,10 +54,10 @@ internal class VaccinationCardTest {
             .hasFieldOrPropertyWithValue("species", Species.CANINE)
             .hasFieldOrPropertyWithValue("petID", petID)
 
-        assertThatCode { card.addApplication(application) }
+        assertThatCode { card add application }
             .doesNotThrowAnyException()
 
-        assertThat(card.countAll()).isEqualTo(1)
+        assertThat(card.size).isEqualTo(1)
     }
 
     @Test
@@ -59,19 +65,19 @@ internal class VaccinationCardTest {
     fun shouldAddWhenValid() {
         val card = VaccinationCard(UUID.randomUUID(), Species.CANINE)
 
-        val applicationValid = VaccineApplication(vaccine, petWeight)
+        val validApplication = vaccine.apply(petWeight)
 
         ReflectionTestUtils.setField(
-            applicationValid, "createdOn",
+            validApplication, "createdOn",
             ApplicationDateTime.of(21, AUGUST, 2021, 10, 1)
         )
 
         assertThatCode {
-            card.addApplication(application)
-            card.addApplication(applicationValid)
+            card add application
+            card add validApplication
         }.doesNotThrowAnyException()
 
-        assertThat(card.countAll()).isEqualTo(2)
+        assertThat(card.size).isEqualTo(2)
     }
 
     @Test
@@ -79,21 +85,20 @@ internal class VaccinationCardTest {
     fun shouldThrowIllegalApplicationException() {
         val card = VaccinationCard(UUID.randomUUID(), Species.CANINE)
 
-        assertThatCode { card.addApplication(application) }
+        assertThatCode { card add application }
             .doesNotThrowAnyException()
 
-        val applicationInterval = VaccineApplication(vaccine, petWeight)
+        val applicationOnInterval = vaccine.apply(petWeight)
 
         ReflectionTestUtils.setField(
-            applicationInterval, "createdOn",
+            applicationOnInterval, "createdOn",
             ApplicationDateTime.of(15, AUGUST, 2021, 10, 0)
         )
 
-        assertThatThrownBy { card.addApplication(applicationInterval) }
+        assertThatThrownBy { card add applicationOnInterval }
             .isExactlyInstanceOf(IllegalApplicationException::class.java)
-            .isInstanceOf(IllegalArgumentException::class.java)
             .hasMessage("Provided application cannot be added today. Status=INTERVAL")
 
-        assertThat(card.countAll()).isEqualTo(1)
+        assertThat(card.size).isEqualTo(1)
     }
 }
