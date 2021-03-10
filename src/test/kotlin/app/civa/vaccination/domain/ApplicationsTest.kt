@@ -130,9 +130,8 @@ internal class ApplicationsTest {
             assertThatThrownBy {
                 applications add application
                 applications add application
-            }.isExactlyInstanceOf(IllegalApplicationException::class.java)
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessage("Provided application already added. Status=SAME")
+            }.isExactlyInstanceOf(InvalidApplicationException::class.java)
+                .hasMessage("Provided application already added")
 
             assertThat(applications)
                 .isNotNull
@@ -161,9 +160,8 @@ internal class ApplicationsTest {
             assertThatThrownBy {
                 applications add application
                 applications add anotherApplication
-            }.isExactlyInstanceOf(IllegalApplicationException::class.java)
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessage("Provided application is before today. Status=BEFORE")
+            }.isExactlyInstanceOf(InvalidApplicationException::class.java)
+                .hasMessage("Provided application is before today")
 
             assertThat(applications)
                 .isNotNull
@@ -192,9 +190,8 @@ internal class ApplicationsTest {
             assertThatThrownBy {
                 applications add application
                 applications add anotherApplication
-            }.isExactlyInstanceOf(IllegalApplicationException::class.java)
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessage("Provided application cannot be added today. Status=INTERVAL")
+            }.isExactlyInstanceOf(InvalidApplicationException::class.java)
+                .hasMessage("Provided application cannot be added today")
 
             assertThat(applications)
                 .isNotNull
@@ -251,8 +248,7 @@ internal class ApplicationsTest {
                 .isEmpty()
 
             assertThatThrownBy { applications deleteBy application.id }
-                .isExactlyInstanceOf(NoSuchElementException::class.java)
-                .isInstanceOf(RuntimeException::class.java)
+                .isExactlyInstanceOf(ApplicationNotFoundException::class.java)
                 .hasMessage("Vaccine Application not found")
 
             assertThat(applications)

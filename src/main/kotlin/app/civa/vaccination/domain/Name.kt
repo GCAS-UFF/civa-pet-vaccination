@@ -7,9 +7,17 @@ private constructor(
 ) {
 
     constructor(builder: NameBuilder) : this(
-        builder.classification,
-        builder.commercial
-    )
+        builder.classification.trim(),
+        builder.commercial.trim()
+    ) {
+        mustNotBeEmpty(builder.classification, builder.commercial)
+    }
+
+    private fun mustNotBeEmpty(vararg values: String) {
+        values.forEach {
+            if (it.isEmpty()) throw InvalidNameException()
+        }
+    }
 
     fun accept(visitor: NameVisitor) {
         visitor.visitClassification(classification)

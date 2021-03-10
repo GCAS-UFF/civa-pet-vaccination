@@ -20,9 +20,8 @@ internal class ApplicationDateTimeTest {
     fun statusSameDay() {
         val a2 = ApplicationDateTime.of(10, AUGUST, 2021, 16, 0)
 
-        assertThat(a1.mapStatusFrom(a2)).isEqualTo(SAME)
-        assertThat(a2.mapStatusFrom(a1)).isEqualTo(SAME)
-        assertThat(a1).isEqualTo(a2)
+        assertThat(a1.mapStatus(a2)).isEqualTo(SAME)
+        assertThat(a2.mapStatus(a1)).isEqualTo(SAME)
     }
 
 
@@ -31,8 +30,7 @@ internal class ApplicationDateTimeTest {
     fun statusBeforeToday() {
         val a2 = ApplicationDateTime.of(9, AUGUST, 2021, 16, 0)
 
-        assertThat(a1.mapStatusFrom(a2)).isEqualTo(BEFORE)
-        assertThat(a1).isEqualTo(a2)
+        assertThat(a1.mapStatus(a2)).isEqualTo(BEFORE)
     }
 
     @Test
@@ -43,8 +41,7 @@ internal class ApplicationDateTimeTest {
     fun compareToShouldBeEqualInterval() {
         val a2 = ApplicationDateTime.of(15, AUGUST, 2021, 16, 0)
 
-        assertThat(a1.mapStatusFrom(a2)).isEqualTo(INTERVAL)
-        assertThat(a1).isEqualTo(a2)
+        assertThat(a1.mapStatus(a2)).isEqualTo(INTERVAL)
     }
 
     @Test
@@ -55,7 +52,6 @@ internal class ApplicationDateTimeTest {
     fun compareToShouldNotBeEqual() {
         val a2 = ApplicationDateTime.of(20, AUGUST, 2021, 16, 0)
 
-        assertThat(a1.mapStatusFrom(a2)).isEqualTo(VALID)
-        assertThat(a1).isNotEqualTo(a2)
+        assertThat(a1.mapStatus(a2)).isEqualTo(VALID)
     }
 }

@@ -19,7 +19,7 @@ private constructor(
         visitor.seeExpirationDate(expirationDate)
     }
 
-    fun mustBeValid() = expirationDate.mustBeValid()
+    fun mustBeValid() = apply { expirationDate.mustBeValid() }
 
 }
 

@@ -21,12 +21,12 @@ internal class BatchTest {
     @DisplayName("throw IllegalArgumentException when input doesn't match pattern")
     fun failWhenValueIsWrong() {
         listOf("1231232", "99/999", "/", "1234/12")
-            .forEach { throwIllegalArgumentWhenInputIsInvalid(it) }
+            .forEach { shouldThrowInvalidBatchException(it) }
     }
 
-    private fun throwIllegalArgumentWhenInputIsInvalid(invalidValue: String) {
+    private fun shouldThrowInvalidBatchException(invalidValue: String) {
         assertThatThrownBy { Batch from invalidValue }
-            .isExactlyInstanceOf(IllegalArgumentException::class.java)
+            .isExactlyInstanceOf(InvalidBatchException::class.java)
     }
 
     @Test

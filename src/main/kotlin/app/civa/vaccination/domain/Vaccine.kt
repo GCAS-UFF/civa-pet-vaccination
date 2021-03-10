@@ -1,7 +1,5 @@
 package app.civa.vaccination.domain
 
-import java.util.*
-
 class Vaccine
 private constructor(
     private val name: Name,
@@ -21,36 +19,18 @@ private constructor(
         visitor.seeFabrication(fabrication)
     }
 
+    infix fun apply(petWeight: PetWeight) = VaccineApplication.from(
+        vaccine = this, petWeight
+    )
+
     infix fun pairNameWith(application: VaccineApplication) =
         name pairWith application
 
-    infix fun mustMatch(species: Species) =
+    infix fun mustMatch(species: Species) = apply {
         efficacy mustMatch species
+    }
 
     fun mustBeValid() = apply { fabrication.mustBeValid() }
-
-    fun apply(weight: PetWeight) = application {
-        id = UUID.randomUUID()
-        createdOn = ApplicationDateTime.now()
-        petWeight = weight
-        vaccine = this@Vaccine.mustBeValid()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Vaccine
-
-        if (name != other.name) return false
-        if (efficacy != other.efficacy) return false
-        if (fabrication != other.fabrication) return false
-
-        return true
-    }
-
-    override fun hashCode() =
-        31 * (31 * name.hashCode() + efficacy.hashCode()) + fabrication.hashCode()
 
 }
 

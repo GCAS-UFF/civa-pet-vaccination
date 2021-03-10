@@ -19,7 +19,7 @@ constructor(private val value: LocalDateTime) {
             ApplicationDateTime(LocalDateTime.of(year, month, day, hour, minute))
     }
 
-    infix fun mapStatusFrom(other: ApplicationDateTime): DateTimeStatus {
+    infix fun mapStatus(other: ApplicationDateTime): DateTimeStatus {
         val otherTime = other.value.truncatedTo(DAYS)
         val thisTime = value.truncatedTo(DAYS)
 
@@ -31,19 +31,6 @@ constructor(private val value: LocalDateTime) {
             else -> VALID
         }
     }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ApplicationDateTime
-        return when (this mapStatusFrom other) {
-            VALID -> false
-            else -> true
-        }
-    }
-
-    override fun hashCode() = value.truncatedTo(DAYS).hashCode()
 
     override fun toString() = "ApplicationDateTime(value=$value)"
 

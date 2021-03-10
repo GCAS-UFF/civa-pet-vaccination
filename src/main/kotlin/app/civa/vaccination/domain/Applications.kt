@@ -1,21 +1,20 @@
 package app.civa.vaccination.domain
 
+import app.civa.vaccination.domain.DateTimeStatus.VALID
 import java.util.*
-import kotlin.NoSuchElementException
 
 class Applications : HashMap<String, Collection<VaccineApplication>>() {
 
-    companion object {
-
-        const val APPLICATION_NOT_FOUND = "Vaccine Application not found"
-    }
-
     infix fun add(entry: VaccineApplication) {
-        val (vaccineName, application) = entry.toPair()
+        val (vaccineName, newApplication) = entry.toPair()
 
-        when (application happenedRecentlyIn this[vaccineName]) {
-            true -> handleException(vaccineName, application)
-            else -> mergeEntry(vaccineName, application)
+        val status = this[vaccineName]
+            ?.map { it getStatusFrom newApplication }
+            ?.lastOrNull { it != VALID }
+
+        when (status) {
+            null -> this.save(vaccineName, newApplication)
+            else -> throw InvalidApplicationException from status
         }
     }
 
@@ -25,39 +24,29 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
     }
 
     infix fun deleteBy(applicationId: UUID) {
-        when (val entry = this findBy applicationId) {
-            null -> throw NoSuchElementException(APPLICATION_NOT_FOUND)
-            else -> this delete entry
+        when (val application = this findBy applicationId) {
+            null -> throw ApplicationNotFoundException from applicationId
+            else -> this delete application
         }
     }
-
-    fun countAll() = this.flatMap { it.value }.count()
 
     private infix fun delete(entry: VaccineApplication) {
         val (vaccineName, application) = entry.toPair()
 
         val filteredApplications = this[vaccineName] minus application
 
-        when (filteredApplications.size) {
+        when (filteredApplications?.size) {
+            null ->  throw ApplicationNotFoundException from application.id
             0 -> this.remove(vaccineName)
             else -> this[vaccineName] = filteredApplications
         }
     }
 
-    private fun handleException(name: String, application: VaccineApplication) {
-        val status = this[name]
-            ?.lastOrNull { it == application }
-            ?.mapStatusFrom(application)
-
-        throw IllegalApplicationException from status
-    }
-
-    private fun mergeEntry(vaccineName: String, application: VaccineApplication) =
+    private fun save(vaccineName: String, application: VaccineApplication) =
         this.merge(vaccineName, listOf(application)) { a, b -> a + b }
+
+    fun countAll() = this.flatMap { it.value }.count()
 
     override fun toString() = "Applications(applications=${this.entries})"
 
 }
-
-infix fun Collection<VaccineApplication>?.minus(application: VaccineApplication) =
-    this!!.filter { it.id != application.id }

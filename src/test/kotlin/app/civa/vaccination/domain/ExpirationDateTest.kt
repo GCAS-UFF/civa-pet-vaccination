@@ -1,16 +1,12 @@
 package app.civa.vaccination.domain
 
-import app.civa.vaccination.domain.ExpirationDate.Companion.VACCINE_EXPIRED
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
 import java.time.ZoneOffset.UTC
-import java.time.temporal.ChronoUnit
-import java.time.temporal.ChronoUnit.MONTHS
 
 @DisplayName("Expiration Date should")
 internal class ExpirationDateTest {
@@ -35,7 +31,7 @@ internal class ExpirationDateTest {
         assertThatThrownBy {
             val date = ExpirationDate of LocalDate.now(UTC).minusDays(1)
             date.mustBeValid()
-        }.isExactlyInstanceOf(IllegalStateException::class.java)
-            .hasMessage(VACCINE_EXPIRED)
+        }.isExactlyInstanceOf(VaccineExpiredException::class.java)
+            .hasMessage("Vaccine has expired")
     }
 }

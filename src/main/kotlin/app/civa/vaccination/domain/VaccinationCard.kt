@@ -1,6 +1,7 @@
 package app.civa.vaccination.domain
 
 import java.util.*
+import kotlin.jvm.Throws
 
 class VaccinationCard
 private constructor(
