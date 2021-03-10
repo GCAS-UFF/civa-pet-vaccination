@@ -9,28 +9,28 @@ private constructor(
     constructor(builder: EfficacyBuilder) : this(
         builder.species,
         builder.agents
-    )
+    ) {
+        mustNotBeEmpty(builder.species, builder.agents)
+    }
 
     fun accept(visitor: EfficacyVisitor) {
         visitor.seeSpecies(species)
         visitor.seeAgents(agents)
     }
 
-    companion object {
-
-        const val SPECIES_DOESNT_MATCH = "Species doesn't match vaccine's species"
+    infix fun mustMatch(species: Species) = apply {
+        this.species mustMatch species
     }
-
-    infix fun mustMatch(species: Species) {
-        when (this.species matches species) {
-            false -> throw IllegalStateException(SPECIES_DOESNT_MATCH)
-        }
-    }
-
 }
 
 fun efficacy(lambda: EfficacyBuilder.() -> Unit): Efficacy {
     val builder = EfficacyEntityBuilder()
     builder.lambda()
     return builder.build()
+}
+
+private fun <T> mustNotBeEmpty(vararg values: Collection<T>) {
+    values.forEach {
+        if (it.isEmpty()) throw IllegalArgumentException()
+    }
 }

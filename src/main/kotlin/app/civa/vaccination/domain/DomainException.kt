@@ -1,5 +1,10 @@
 package app.civa.vaccination.domain
 
-import java.lang.RuntimeException
+abstract class DomainException(
+    override val message: String,
+    protected open val expected: String,
+    protected open val actual: String
+) : Exception(message) {
 
-abstract class DomainException : RuntimeException()
+    fun explain() = "Expected: $expected, Actual: $actual"
+}

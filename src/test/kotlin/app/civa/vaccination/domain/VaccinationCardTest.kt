@@ -96,8 +96,9 @@ internal class VaccinationCardTest {
         )
 
         assertThatThrownBy { card add applicationOnInterval }
-            .isExactlyInstanceOf(IllegalApplicationException::class.java)
-            .hasMessage("Provided application cannot be added today. Status=INTERVAL")
+            .isExactlyInstanceOf(InvalidApplicationException::class.java)
+            .isInstanceOf(DomainException::class.java)
+            .hasMessage("Provided application cannot be added today")
 
         assertThat(card.size).isEqualTo(1)
     }

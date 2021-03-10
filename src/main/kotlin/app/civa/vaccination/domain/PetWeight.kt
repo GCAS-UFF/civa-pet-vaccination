@@ -12,13 +12,10 @@ private constructor(private val weight: BigDecimal) {
 
     companion object {
 
-        private const val PET_WEIGHT_MUST_BE_POSITIVE =
-            "Pet weight must be positive: 0 (ZERO) or greater"
-
-        infix fun from(value: Double) =
-            when (value test { it <= 0 }) {
-                true -> throw IllegalArgumentException(PET_WEIGHT_MUST_BE_POSITIVE)
-                else -> PetWeight(value scaledTo 2)
+        infix fun from(weight: Double) =
+            when (weight test { it <= 0 }) {
+                true -> throw InvalidPetWeightException from weight
+                else -> PetWeight(weight scaledTo 2)
             }
     }
 

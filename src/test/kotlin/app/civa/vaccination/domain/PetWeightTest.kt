@@ -50,7 +50,9 @@ internal class PetWeightTest {
     @DisplayName("throw exception when weight is negative or zero")
     fun exceptionWhenWeightIsZero() {
         assertThatThrownBy { PetWeight from 0.0 }
-            .isInstanceOf(IllegalArgumentException::class.java)
+            .isInstanceOf(InvalidPetWeightException::class.java)
             .hasMessage("Pet weight must be positive: 0 (ZERO) or greater")
+            .hasFieldOrPropertyWithValue("actual", "0.0" )
+            .hasFieldOrPropertyWithValue("expected", "0.0 to be bigger than 0.0")
     }
 }

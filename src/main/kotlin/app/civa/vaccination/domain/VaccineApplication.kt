@@ -10,6 +10,16 @@ private constructor(
     private val createdOn: ApplicationDateTime
 ) {
 
+    companion object {
+
+        fun from(vaccine: Vaccine, petWeight: PetWeight) = VaccineApplication(
+            id = UUID.randomUUID(),
+            vaccine,
+            petWeight,
+            createdOn = ApplicationDateTime.now()
+        )
+    }
+
     constructor(builder: VaccineApplicationBuilder) : this(
         builder.id,
         builder.vaccine,
@@ -29,37 +39,18 @@ private constructor(
     infix fun mustMatch(species: Species) =
         apply { vaccine mustMatch species }
 
-    infix fun mapStatusFrom(other: VaccineApplication) =
-        createdOn mapStatusFrom other.createdOn
-
-    infix fun happenedRecentlyIn(applications: Collection<VaccineApplication>?) =
-        applications?.any { it == this }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as VaccineApplication
-        return when {
-            other.vaccine != vaccine -> false
-            createdOn != other.createdOn -> false
-            else -> true
-        }
-    }
-
-    override fun hashCode(): Int {
-        var result = vaccine.hashCode()
-        result = 31 * result + createdOn.hashCode()
-        return result
-    }
+    infix fun getStatusFrom(other: VaccineApplication) =
+        createdOn mapStatus other.createdOn
 
     override fun toString() =
         "VaccineApplication(id=$id, " +
         "vaccine=$vaccine, " +
         "petWeight=$petWeight, " +
         "createdOn=$createdOn)"
-
 }
+
+infix fun Collection<VaccineApplication>?.minus(application: VaccineApplication) =
+    this?.filter { it.id != application.id }
 
 fun application(lambda: VaccineApplicationEntityBuilder.() -> Unit): VaccineApplication {
     val builder = VaccineApplicationEntityBuilder()

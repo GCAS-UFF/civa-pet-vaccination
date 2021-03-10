@@ -6,43 +6,29 @@ import java.time.ZoneOffset.UTC
 
 class ExpirationDate
 private constructor(
-    private val value: LocalDate
+    private val expirationDate: LocalDate
 ) {
 
     companion object {
 
-        const val VACCINE_EXPIRED = "Vaccine has expired"
-
         infix fun of(date: LocalDate) = ExpirationDate(date)
 
         infix fun from(period: Period) = ExpirationDate(
-            LocalDate.now(UTC).plus(period))
+            LocalDate.now(UTC).plus(period)
+        )
     }
 
-    private fun hasExpired(): Boolean {
-        val today = LocalDate.now(UTC)
-        return value.isBefore(today)
-    }
+    fun mustBeValid() = apply { expirationDate.mustBeValid() }
 
-    fun mustBeValid() {
-        when (this.hasExpired()) {
-            true -> throw IllegalStateException(VACCINE_EXPIRED)
-        }
-    }
+    override fun toString() = "ExpirationDate(value=$expirationDate)"
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+}
 
-        other as ExpirationDate
-        return when {
-            value != other.value -> false
-            else -> true
-        }
-    }
+private fun LocalDate.hasExpired(): Boolean {
+    val today = LocalDate.now(UTC)
+    return this.isBefore(today)
+}
 
-    override fun hashCode() = value.hashCode()
-
-    override fun toString() = "ExpirationDate(value=$value)"
-
+private fun LocalDate.mustBeValid() = apply {
+    if (this.hasExpired()) throw VaccineExpiredException from this
 }

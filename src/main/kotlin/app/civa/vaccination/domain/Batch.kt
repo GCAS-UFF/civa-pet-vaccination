@@ -24,23 +24,10 @@ private constructor(
 
     override fun toString() = "Batch(prefix='$prefix', suffix='$suffix')"
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Batch
-        return when {
-            prefix != other.prefix -> false
-            suffix != other.suffix -> false
-            else -> true
-        }
-    }
-
-    override fun hashCode() = prefix.hashCode() * 31 + suffix.hashCode()
 }
 
 private infix fun String.mustMatch(pattern: Regex) {
     when (this matches pattern) {
-        false -> throw IllegalArgumentException()
+        false -> throw InvalidBatchException from this
     }
 }

@@ -1,8 +1,11 @@
 package app.civa.vaccination.domain
 
-enum class  Species {
-    CANINE, FELINE
+enum class Species {
+    CANINE, FELINE;
 }
 
-infix fun Collection<Species>.matches(species: Species) =
-    this.contains(species)
+infix fun Collection<Species>.mustMatch(species: Species) = apply {
+    when (this.contains(species)) {
+        false -> throw SpeciesMismatchException.from(species, this)
+    }
+}
