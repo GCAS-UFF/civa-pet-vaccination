@@ -1,48 +1,50 @@
 package app.civa.vaccination.domain
 
-import org.assertj.core.api.Assertions.*
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.data.blocking.forAll
+import io.kotest.data.row
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 
-@DisplayName("Batch should")
-internal class BatchTest {
-
-    @Test
-    @DisplayName("be created successfully when input matches pattern")
-    fun createdSuccessfully() {
-        assertThatCode {
-            Batch.from("000/00")
-            Batch.from("086/21")
-            Batch.from("999/99")
-        }.doesNotThrowAnyException()
+class BatchTest : BehaviorSpec({
+    given("valid inputs") {
+        `when`("Batch is instantiated") {
+            then("it should not throw any exceptions") {
+                forAll(
+                        row("000/00"),
+                        row("086/21"),
+                        row("999/99")
+                ) { shouldNotThrowAny { Batch from it } }
+            }
+        }
     }
 
-    @Test
-    @DisplayName("throw IllegalArgumentException when input doesn't match pattern")
-    fun failWhenValueIsWrong() {
-        listOf("1231232", "99/999", "/", "1234/12")
-            .forEach { shouldThrowInvalidBatchException(it) }
+    given("invalid inputs") {
+        `when`("Batch is instantiated") {
+            then("it should throw InvalidBatchException") {
+                forAll(
+                        row("1231232"),
+                        row("99/999"),
+                        row("/"),
+                        row("1234/12")
+                ) {
+                    shouldThrowExactly<InvalidBatchException> {
+                        Batch from it
+                    }
+                }
+            }
+        }
     }
 
-    private fun shouldThrowInvalidBatchException(invalidValue: String) {
-        assertThatThrownBy { Batch from invalidValue }
-            .isExactlyInstanceOf(InvalidBatchException::class.java)
+    given("a valid Batch instance") {
+        `when`("property value is accessed") {
+            then("it should return correct information") {
+                (Batch from "002/21")
+                        .shouldBeInstanceOf<Batch>()
+                        .value shouldBe "002/21"
+            }
+        }
     }
-
-    @Test
-    @DisplayName("get value when creation is successful")
-    fun getValueSuccessfully() {
-        assertThatCode {
-            val value = "002/21"
-            val batch = Batch from value
-
-            assertThat(batch)
-                .isExactlyInstanceOf(Batch::class.java)
-                .hasNoNullFieldsOrProperties()
-                .hasFieldOrPropertyWithValue("prefix", "002")
-                .hasFieldOrPropertyWithValue("suffix", "21")
-                .hasFieldOrPropertyWithValue("value", value)
-
-        }.doesNotThrowAnyException()
-    }
-}
+})
