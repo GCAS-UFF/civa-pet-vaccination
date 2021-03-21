@@ -20,8 +20,8 @@ private constructor(
     }
 
     infix fun accepts(visitor: NameVisitor) {
-        visitor.visitClassification(classification)
-        visitor.visitCommercial(commercial)
+        visitor.seeClassification(classification)
+        visitor.seeCommercial(commercial)
     }
 
     infix fun pairWith(application: VaccineApplication) =

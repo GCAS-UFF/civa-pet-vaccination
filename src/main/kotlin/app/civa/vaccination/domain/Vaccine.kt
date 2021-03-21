@@ -13,15 +13,14 @@ private constructor(
         builder.fabrication
     )
 
-    infix fun accept(visitor: VaccineVisitor) {
+    infix fun accepts(visitor: VaccineVisitor) {
         visitor.seeName(name)
         visitor.seeEfficacy(efficacy)
         visitor.seeFabrication(fabrication)
     }
 
-    infix fun apply(petWeight: PetWeight) = VaccineApplication.from(
-        vaccine = this, petWeight
-    )
+    infix fun apply(petWeight: PetWeight) =
+        VaccineApplication.from(vaccine = this, petWeight)
 
     infix fun pairNameWith(application: VaccineApplication) =
         name pairWith application
@@ -30,12 +29,19 @@ private constructor(
         efficacy mustMatch species
     }
 
-    fun mustBeValid() = apply { fabrication.mustBeValid() }
-
+    fun mustBeValid() = apply {
+        fabrication.mustBeValid()
+    }
 }
 
 fun vaccine(lambda: VaccineBuilder.() -> Unit): Vaccine {
-    val builder = VaccineEntityBuilder()
+    val builder = object : VaccineBuilder {
+        override lateinit var name: Name
+        override lateinit var efficacy: Efficacy
+        override lateinit var fabrication: Fabrication
+
+        override fun build() = Vaccine(this)
+    }
     builder.lambda()
     return builder.build()
 }
