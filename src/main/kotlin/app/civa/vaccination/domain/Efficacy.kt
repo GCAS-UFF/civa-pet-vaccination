@@ -13,7 +13,7 @@ private constructor(
         mustNotBeEmpty(builder.species, builder.agents)
     }
 
-    fun accept(visitor: EfficacyVisitor) {
+    infix fun accepts(visitor: EfficacyVisitor) {
         visitor.seeSpecies(species)
         visitor.seeAgents(agents)
     }
@@ -24,13 +24,18 @@ private constructor(
 }
 
 fun efficacy(lambda: EfficacyBuilder.() -> Unit): Efficacy {
-    val builder = EfficacyEntityBuilder()
+    val builder = object : EfficacyBuilder {
+        override lateinit var species: Collection<Species>
+        override lateinit var agents: Collection<String>
+
+        override fun build() = Efficacy(this)
+    }
     builder.lambda()
     return builder.build()
 }
 
 private fun <T> mustNotBeEmpty(vararg values: Collection<T>) {
     values.forEach {
-        if (it.isEmpty()) throw IllegalArgumentException()
+        if (it.isEmpty()) throw InvalidEfficacyException()
     }
 }
