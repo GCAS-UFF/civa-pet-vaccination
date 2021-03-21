@@ -77,7 +77,8 @@ class EfficacyTest : BehaviorSpec({
         }
     }
     given("a valid instance of Efficacy") {
-        `when`("it accepts an efficacy visitor") {
+        `when`("it accepts an EfficacyVisitor") {
+
             then("visitor methods should be called in sequence") {
                 val visitorMock = mockk<EfficacyVisitor>()
                 every { visitorMock.seeSpecies(any()) } just Runs
@@ -89,8 +90,8 @@ class EfficacyTest : BehaviorSpec({
                 } accepts visitorMock
 
                 verifySequence {
-                    visitorMock.seeSpecies(setOf(Species.FELINE, Species.CANINE))
-                    visitorMock.seeAgents(setOf("raiva"))
+                    visitorMock.seeSpecies(any())
+                    visitorMock.seeAgents(any())
                 }
             }
         }

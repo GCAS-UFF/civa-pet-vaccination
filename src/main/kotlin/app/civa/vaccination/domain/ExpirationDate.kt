@@ -18,10 +18,12 @@ private constructor(
         )
     }
 
-    fun mustBeValid() = apply { expirationDate.mustBeValid() }
+    fun mustBeValid() = apply {
+        expirationDate.mustBeValid()
+    }
 
-    override fun toString() = "ExpirationDate(value=$expirationDate)"
-
+    override fun toString() =
+        "ExpirationDate(value=$expirationDate)"
 }
 
 private fun LocalDate.hasExpired(): Boolean {
@@ -30,5 +32,7 @@ private fun LocalDate.hasExpired(): Boolean {
 }
 
 private fun LocalDate.mustBeValid() = apply {
-    if (this.hasExpired()) throw VaccineExpiredException from this
+    if (this.hasExpired()) {
+        throw VaccineExpiredException from this
+    }
 }
