@@ -39,6 +39,8 @@ class VaccineTest : BehaviorSpec({
                 }
                 exception shouldHaveMessage "Vaccine has expired"
                 exception.explain() shouldBe "Expected: E, Actual: A"
+
+                verify(exactly = 1) { fabricationMock.mustBeValid() }
             }
         }
     }
@@ -53,8 +55,10 @@ class VaccineTest : BehaviorSpec({
                         name = mockk()
                         efficacy = mockk()
                         fabrication = fabricationMock
-                    }
+                    }.mustBeValid()
                 }
+
+                verify(exactly = 1) { fabricationMock.mustBeValid() }
             }
         }
     }
@@ -71,6 +75,8 @@ class VaccineTest : BehaviorSpec({
                         fabrication = mockk()
                     } mustMatch Species.CANINE
                 }
+
+                verify(exactly = 1) { efficacyMock.mustMatch(eq(Species.CANINE)) }
             }
         }
         `when`("it does not match vaccine's species") {
@@ -88,6 +94,8 @@ class VaccineTest : BehaviorSpec({
                 }
                 exception shouldHaveMessage "Vaccine has expired"
                 exception.explain() shouldBe "Expected: E, Actual: A"
+
+                verify(exactly = 1) { efficacyMock.mustMatch(eq(Species.FELINE)) }
             }
         }
     }
@@ -95,24 +103,27 @@ class VaccineTest : BehaviorSpec({
         `when`("a valid Vaccine is provided") {
             then("it should create a VaccineApplication") {
                 val petWeight = mockk<PetWeight>()
+
                 val fabricationMock = mockk<Fabrication>()
                 every { fabricationMock.mustBeValid() } returns fabricationMock
 
                 shouldNotThrowAny {
-                    val application =
-                        vaccine {
-                            name = mockk()
-                            fabrication = fabricationMock
-                            efficacy = mockk()
-                        } apply petWeight
+                    val application = vaccine {
+                        name = mockk()
+                        fabrication = fabricationMock
+                        efficacy = mockk()
+                    } apply petWeight
 
                     application.shouldBeInstanceOf<VaccineApplication>()
                 }
+
+                verify(exactly = 1) { fabricationMock.mustBeValid() }
             }
         }
         `when`("an expired Vaccine is provided") {
             then("it should throw ExpiredVaccineException") {
                 val petWeight = mockk<PetWeight>()
+
                 val fabricationMock = mockk<Fabrication>()
                 every { fabricationMock.mustBeValid() } throws
                         ExpiredVaccineException("Vaccine has expired", "E", "A")
@@ -126,15 +137,17 @@ class VaccineTest : BehaviorSpec({
                 }
                 exception shouldHaveMessage "Vaccine has expired"
                 exception.explain() shouldBe "Expected: E, Actual: A"
+
+                verify(exactly = 1) { fabricationMock.mustBeValid() }
             }
         }
     }
     given("a vaccine application") {
         `when`("it pairs with a Vaccine name") {
             then("it should return the pair") {
-                val nameMock = mockk<Name>()
                 val applicationMock = mockk<VaccineApplication>()
 
+                val nameMock = mockk<Name>()
                 every { nameMock pairWith any() } returns
                         ("Antirrábica" to applicationMock)
 
