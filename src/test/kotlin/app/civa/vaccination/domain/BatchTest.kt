@@ -6,6 +6,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.data.blocking.forAll
 import io.kotest.data.row
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeInstanceOf
 
 class BatchTest : BehaviorSpec({
@@ -20,7 +21,6 @@ class BatchTest : BehaviorSpec({
             }
         }
     }
-
     given("invalid inputs") {
         `when`("Batch is instantiated") {
             then("it should throw InvalidBatchException") {
@@ -30,14 +30,15 @@ class BatchTest : BehaviorSpec({
                         row("/"),
                         row("1234/12")
                 ) {
-                    shouldThrowExactly<InvalidBatchException> {
+                    val exception = shouldThrowExactly<InvalidBatchException> {
                         Batch from it
                     }
+                    exception shouldHaveMessage "Batch doesn't match required pattern"
+                    exception.explain() shouldBe "Expected: ddd/dd, Actual: $it"
                 }
             }
         }
     }
-
     given("a valid Batch instance") {
         `when`("property value is accessed") {
             then("it should return correct information") {
