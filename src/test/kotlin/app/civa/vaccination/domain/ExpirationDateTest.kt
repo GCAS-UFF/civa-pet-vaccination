@@ -36,13 +36,14 @@ class ExpirationDateTest : BehaviorSpec({
     given("a date before now") {
         `when`("ExpirationDate is validated") {
             then("it must be expired") {
-                val exception = shouldThrowExactly<VaccineExpiredException> {
-                    val date = ExpirationDate of LocalDate.now(UTC).minusDays(20)
-                    date.mustBeValid()
+                val date = LocalDate.now(UTC).minusDays(20)
+                val exception = shouldThrowExactly<ExpiredVaccineException> {
+                    val expirationDate = ExpirationDate of date
+                    expirationDate.mustBeValid()
                 }
                 exception shouldHaveMessage "Vaccine has expired"
                 exception.explain() shouldBe
-                        "Expected: Before 2021-03-21, Actual: 2021-03-01"
+                        "Expected: Before ${LocalDate.now(UTC)}, Actual: $date"
             }
         }
     }

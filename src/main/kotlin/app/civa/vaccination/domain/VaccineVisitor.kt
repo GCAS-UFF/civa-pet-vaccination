@@ -2,7 +2,7 @@ package app.civa.vaccination.domain
 
 interface VaccineVisitor {
 
-    fun seeName(name: Name)
-    fun seeEfficacy(efficacy: Efficacy)
-    fun seeFabrication(fabrication: Fabrication)
+    infix fun seeName(name: Name)
+    infix fun seeEfficacy(efficacy: Efficacy)
+    infix fun seeFabrication(fabrication: Fabrication)
 }

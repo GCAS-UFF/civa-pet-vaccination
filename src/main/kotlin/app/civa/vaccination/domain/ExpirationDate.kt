@@ -33,6 +33,6 @@ private fun LocalDate.hasExpired(): Boolean {
 
 private fun LocalDate.mustBeValid() = apply {
     if (this.hasExpired()) {
-        throw VaccineExpiredException from this
+        throw ExpiredVaccineException from this
     }
 }

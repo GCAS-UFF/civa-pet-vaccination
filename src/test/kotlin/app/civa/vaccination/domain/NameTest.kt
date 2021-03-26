@@ -66,8 +66,8 @@ class NameTest : BehaviorSpec({
         `when`("it accepts a name visitor") {
             then("visitor methods should be called in sequence") {
                 val visitorMock = mockk<NameVisitor>()
-                every { visitorMock.seeClassification(any()) } just Runs
-                every { visitorMock.seeCommercial(any()) } just Runs
+                every { visitorMock seeClassification any() } just Runs
+                every { visitorMock seeCommercial any() } just Runs
 
                 name {
                     classification = "Antirrábica"
@@ -75,8 +75,8 @@ class NameTest : BehaviorSpec({
                 } accepts visitorMock
 
                 verifySequence {
-                    visitorMock.seeClassification(any())
-                    visitorMock.seeCommercial(any())
+                    visitorMock seeClassification any()
+                    visitorMock seeCommercial any()
                 }
             }
         }

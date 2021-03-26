@@ -42,9 +42,9 @@ class FabricationTest : BehaviorSpec({
             then("it should throw VaccineExpiredException") {
                 val expirationDateMock = mockk<ExpirationDate>()
                 every { expirationDateMock.mustBeValid() } throws
-                        VaccineExpiredException("Test expiration", "E", "A")
+                        ExpiredVaccineException("Test expiration", "E", "A")
 
-                val exception = shouldThrowExactly<VaccineExpiredException> {
+                val exception = shouldThrowExactly<ExpiredVaccineException> {
                     fabrication {
                         company = UUID.randomUUID().toString()
                         batch = mockk()
@@ -76,9 +76,9 @@ class FabricationTest : BehaviorSpec({
         `when`("it accepts a FabricationVisitor") {
             then("visitor methods should be called in sequence") {
                 val visitorMock = mockk<FabricationVisitor>()
-                every { visitorMock.seeCompany(any()) } just Runs
-                every { visitorMock.seeBatch(any()) } just Runs
-                every { visitorMock.seeExpirationDate(any()) } just Runs
+                every { visitorMock seeCompany any() } just Runs
+                every { visitorMock seeBatch any() } just Runs
+                every { visitorMock seeExpirationDate any() } just Runs
 
                 fabrication {
                     company = UUID.randomUUID().toString()
@@ -87,9 +87,9 @@ class FabricationTest : BehaviorSpec({
                 } accepts visitorMock
 
                 verifySequence {
-                    visitorMock.seeCompany(any())
-                    visitorMock.seeBatch(any())
-                    visitorMock.seeExpirationDate(any())
+                    visitorMock seeCompany any()
+                    visitorMock seeBatch any()
+                    visitorMock seeExpirationDate any()
                 }
             }
         }

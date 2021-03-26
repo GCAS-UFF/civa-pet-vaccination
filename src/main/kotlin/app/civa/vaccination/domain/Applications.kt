@@ -9,7 +9,7 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
         val (vaccineName, newApplication) = entry.toPair()
 
         val status = this[vaccineName]
-            ?.map { it getStatusFrom newApplication }
+            ?.map { it mapStatusFrom newApplication }
             ?.lastOrNull { it != VALID }
 
         when (status) {

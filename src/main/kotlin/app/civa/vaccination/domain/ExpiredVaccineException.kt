@@ -3,7 +3,7 @@ package app.civa.vaccination.domain
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 
-class VaccineExpiredException
+class ExpiredVaccineException
 constructor(
     override val message: String,
     override val expected: String,
@@ -15,7 +15,7 @@ constructor(
         private const val VACCINE_EXPIRED = "Vaccine has expired"
 
         infix fun from(passedDate: LocalDate) =
-            VaccineExpiredException(
+            ExpiredVaccineException(
                 message = VACCINE_EXPIRED,
                 expected = "Before ${LocalDate.now(UTC)}",
                 actual = "$passedDate"

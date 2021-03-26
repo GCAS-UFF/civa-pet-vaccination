@@ -5,6 +5,8 @@ import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.*
 
 class VaccineTest : BehaviorSpec({
@@ -26,9 +28,9 @@ class VaccineTest : BehaviorSpec({
             then("it should throw VaccineExpiredException") {
                 val fabricationMock = mockk<Fabrication>()
                 every { fabricationMock.mustBeValid() } throws
-                        VaccineExpiredException("Vaccine has expired", "E", "A")
+                        ExpiredVaccineException("Vaccine has expired", "E", "A")
 
-                val exception = shouldThrowExactly<VaccineExpiredException> {
+                val exception = shouldThrowExactly<ExpiredVaccineException> {
                     vaccine {
                         name = mockk()
                         efficacy = mockk()
@@ -75,9 +77,9 @@ class VaccineTest : BehaviorSpec({
             then("it should throw VaccineExpiredException") {
                 val efficacyMock = mockk<Efficacy>()
                 every { efficacyMock.mustMatch(eq(Species.FELINE)) } throws
-                        VaccineExpiredException("Vaccine has expired", "E", "A")
+                        ExpiredVaccineException("Vaccine has expired", "E", "A")
 
-                val exception = shouldThrowExactly<VaccineExpiredException> {
+                val exception = shouldThrowExactly<ExpiredVaccineException> {
                     vaccine {
                         name = mockk()
                         efficacy = efficacyMock
@@ -89,13 +91,75 @@ class VaccineTest : BehaviorSpec({
             }
         }
     }
+    given("a PetWeight") {
+        `when`("a valid Vaccine is provided") {
+            then("it should create a VaccineApplication") {
+                val petWeight = mockk<PetWeight>()
+                val fabricationMock = mockk<Fabrication>()
+                every { fabricationMock.mustBeValid() } returns fabricationMock
+
+                shouldNotThrowAny {
+                    val application =
+                        vaccine {
+                            name = mockk()
+                            fabrication = fabricationMock
+                            efficacy = mockk()
+                        } apply petWeight
+
+                    application.shouldBeInstanceOf<VaccineApplication>()
+                }
+            }
+        }
+        `when`("an expired Vaccine is provided") {
+            then("it should throw ExpiredVaccineException") {
+                val petWeight = mockk<PetWeight>()
+                val fabricationMock = mockk<Fabrication>()
+                every { fabricationMock.mustBeValid() } throws
+                        ExpiredVaccineException("Vaccine has expired", "E", "A")
+
+                val exception = shouldThrowExactly<ExpiredVaccineException> {
+                    vaccine {
+                        name = mockk()
+                        fabrication = fabricationMock
+                        efficacy = mockk()
+                    } apply petWeight
+                }
+                exception shouldHaveMessage "Vaccine has expired"
+                exception.explain() shouldBe "Expected: E, Actual: A"
+            }
+        }
+    }
+    given("a vaccine application") {
+        `when`("it pairs with a Vaccine name") {
+            then("it should return the pair") {
+                val nameMock = mockk<Name>()
+                val applicationMock = mockk<VaccineApplication>()
+
+                every { nameMock pairWith any() } returns
+                        ("Antirrábica" to applicationMock)
+
+                val pair = vaccine {
+                    name = nameMock
+                    efficacy = mockk()
+                    fabrication = mockk()
+                } pairNameWith applicationMock
+
+                pair.first shouldBe "Antirrábica"
+                pair.second shouldBeSameInstanceAs applicationMock
+
+                verify(exactly = 1) {
+                    nameMock.pairWith(any())
+                }
+            }
+        }
+    }
     given("a valid instance of Vaccine") {
         `when`("it accepts a VaccineVisitor") {
             then("visitor methods should be called in sequence") {
                 val visitorMock = mockk<VaccineVisitor>()
-                every { visitorMock.seeName(any()) } just Runs
-                every { visitorMock.seeEfficacy(any()) } just Runs
-                every { visitorMock.seeFabrication(any()) } just Runs
+                every { visitorMock seeName any() } just Runs
+                every { visitorMock seeEfficacy any() } just Runs
+                every { visitorMock seeFabrication any() } just Runs
 
                 vaccine {
                     name = mockk()
@@ -104,9 +168,9 @@ class VaccineTest : BehaviorSpec({
                 } accepts visitorMock
 
                 verifySequence {
-                    visitorMock.seeName(any())
-                    visitorMock.seeEfficacy(any())
-                    visitorMock.seeFabrication(any())
+                    visitorMock seeName any()
+                    visitorMock seeEfficacy any()
+                    visitorMock seeFabrication any()
                 }
             }
         }
