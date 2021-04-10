@@ -19,7 +19,8 @@ private constructor(
         visitor.seeFabrication(fabrication)
     }
 
-    infix fun apply(petWeight: PetWeight) = VaccineApplication.from(vaccine = this, petWeight)
+    infix fun apply(petWeight: PetWeight) =
+        VaccineApplication.from(vaccine = this, petWeight)
 
     infix fun pairNameWith(application: VaccineApplication) =
         name pairWith application

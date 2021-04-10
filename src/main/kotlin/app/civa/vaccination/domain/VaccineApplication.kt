@@ -14,7 +14,7 @@ private constructor(
 
         fun from(vaccine: Vaccine, petWeight: PetWeight) = VaccineApplication(
             id = UUID.randomUUID(),
-            vaccine,
+            vaccine = vaccine.mustBeValid(),
             petWeight,
             createdOn = ApplicationDateTime.now()
         )

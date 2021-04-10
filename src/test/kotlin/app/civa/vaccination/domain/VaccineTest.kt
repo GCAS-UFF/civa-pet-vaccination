@@ -8,6 +8,7 @@ import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import io.mockk.*
+import org.junit.jupiter.api.assertDoesNotThrow
 
 class VaccineTest : BehaviorSpec({
     given("a name, an efficacy and a fabrication") {
@@ -160,9 +161,7 @@ class VaccineTest : BehaviorSpec({
                 pair.first shouldBe "Antirrábica"
                 pair.second shouldBeSameInstanceAs applicationMock
 
-                verify(exactly = 1) {
-                    nameMock.pairWith(any())
-                }
+                verify(exactly = 1) { nameMock.pairWith(any()) }
             }
         }
     }
@@ -174,11 +173,13 @@ class VaccineTest : BehaviorSpec({
                 every { visitorMock seeEfficacy any() } just Runs
                 every { visitorMock seeFabrication any() } just Runs
 
-                vaccine {
-                    name = mockk()
-                    efficacy = mockk()
-                    fabrication = mockk()
-                } accepts visitorMock
+                assertDoesNotThrow {
+                    vaccine {
+                        name = mockk()
+                        efficacy = mockk()
+                        fabrication = mockk()
+                    } accepts visitorMock
+                }
 
                 verifySequence {
                     visitorMock seeName any()
