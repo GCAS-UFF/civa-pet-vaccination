@@ -10,10 +10,6 @@ private constructor(
     private val species: Species,
     private val applications: Applications
 ) {
-
-    val size: Int
-        get() = applications.countAll()
-
     constructor(petID: UUID, species: Species) : this(
         UUID.randomUUID(),
         petID,
@@ -48,7 +44,5 @@ private constructor(
         "VaccinationCard(id=$id, " +
         "petID=$petID, " +
         "species=$species, " +
-        "applications=$applications, " +
-        "size=$size)"
-
+        "applications=$applications"
 }

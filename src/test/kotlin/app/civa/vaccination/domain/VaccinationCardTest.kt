@@ -57,7 +57,6 @@ internal class VaccinationCardTest {
         assertThatCode { card add application }
             .doesNotThrowAnyException()
 
-        assertThat(card.size).isEqualTo(1)
     }
 
     @Test
@@ -76,8 +75,6 @@ internal class VaccinationCardTest {
             card add application
             card add validApplication
         }.doesNotThrowAnyException()
-
-        assertThat(card.size).isEqualTo(2)
     }
 
     @Test
@@ -99,7 +96,5 @@ internal class VaccinationCardTest {
             .isExactlyInstanceOf(InvalidApplicationException::class.java)
             .isInstanceOf(DomainException::class.java)
             .hasMessage("Provided application cannot be added today")
-
-        assertThat(card.size).isEqualTo(1)
     }
 }
