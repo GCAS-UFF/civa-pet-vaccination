@@ -1,319 +1,278 @@
 package app.civa.vaccination.domain
 
-import org.assertj.core.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.springframework.test.util.ReflectionTestUtils
-import java.time.Month.AUGUST
-import java.time.Period
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.data.forAll
+import io.kotest.data.row
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.maps.shouldContain
+import io.kotest.matchers.maps.shouldNotBeEmpty
+import io.kotest.matchers.maps.shouldNotContain
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import org.junit.jupiter.api.assertDoesNotThrow
+import java.util.*
 
-@DisplayName("Applications should")
-internal class ApplicationsTest {
+class ApplicationsTest : BehaviorSpec({
+    given("a vaccine application to be added") {
+        `when`("it is the first application of that name") {
+            then("it should be added successfully") {
+                val slot = slot<VaccineApplication>()
+                val vaccineMock = mockk<Vaccine>()
+                every {
+                    vaccineMock pairNameWith capture(slot)
+                } answers { "Name Test" to slot.captured }
 
-    companion object {
+                val applications = Applications()
 
-        private val msdVaccine = vaccine {
-            name = name {
-                classification = "Antirrábica"
-                commercial = "Nobivac® Raiva"
-            }
-            efficacy = efficacy {
-                species = setOf(Species.CANINE, Species.FELINE)
-                agents = setOf("Raiva")
-            }
-            fabrication = fabrication {
-                company = "MSD"
-                batch = Batch from "012/22"
-                expirationDate = ExpirationDate from Period.ofMonths(6)
+                shouldNotThrowAny {
+                    applications add application {
+                        id = mockk()
+                        vaccine = vaccineMock
+                        createdOn = mockk()
+                        petWeight = mockk()
+                    }
+                }
+
+                applications.shouldNotBeNull().shouldNotBeEmpty()
+                applications.size shouldBe 1
+                applications shouldContain ("Name Test" to listOf(slot.captured))
+
+                verify(exactly = 1) { vaccineMock pairNameWith capture(slot) }
             }
         }
+        `when`("it is not the first application of that name") {
+            and("it has happened after interval") {
+                then("it should be added to applications successfully") {
+                    val slot = slot<VaccineApplication>()
+                    val vaccineMock = mockk<Vaccine>()
+                    every {
+                        vaccineMock pairNameWith capture(slot)
+                    } answers { "Name Test" to slot.captured }
 
-        private val zoetisVaccine =  vaccine {
-            name = name {
-                classification = "Múltipla V10"
-                commercial = "Vanguard® Plus"
+                    val vaccineApplicationMock = mockk<VaccineApplication>()
+                    every { vaccineApplicationMock mapStatusFrom any() } returns DateTimeStatus.VALID
+                    every {
+                        vaccineApplicationMock.toPair()
+                    } answers { "Name Test" to vaccineApplicationMock }
+
+                    val applications = Applications()
+                    applications add vaccineApplicationMock
+
+                    shouldNotThrowAny {
+                        applications add application {
+                            id = mockk()
+                            vaccine = vaccineMock
+                            createdOn = mockk()
+                            petWeight = mockk()
+                        }
+                    }
+
+                    applications.shouldNotBeNull().shouldNotBeEmpty()
+                    applications.size shouldBe 1
+                    applications shouldContain ("Name Test" to listOf(vaccineApplicationMock, slot.captured))
+
+                    verify {
+                        vaccineApplicationMock.toPair()
+                        vaccineMock pairNameWith capture(slot)
+                        vaccineApplicationMock mapStatusFrom any()
+                    }
+                }
             }
-            efficacy = efficacy {
-                species = setOf(Species.CANINE)
-                agents = setOf("1", "2", "3")
+            and("it is not valid") {
+                then("it should not be added") {
+                    forAll(
+                        row(DateTimeStatus.BEFORE),
+                        row(DateTimeStatus.SAME),
+                        row(DateTimeStatus.INTERVAL)
+                    ) {
+                        val slot = slot<VaccineApplication>()
+                        val vaccineMock = mockk<Vaccine>()
+                        every {
+                            vaccineMock pairNameWith capture(slot)
+                        } answers { "Name Test" to slot.captured }
+
+                        val vaccineApplicationMock = mockk<VaccineApplication>()
+                        every { vaccineApplicationMock mapStatusFrom any() } returns it
+                        every {
+                            vaccineApplicationMock.toPair()
+                        } answers { "Name Test" to vaccineApplicationMock }
+
+                        val applications = Applications()
+                        applications add vaccineApplicationMock
+
+                        shouldThrowExactly<InvalidApplicationException> {
+                            applications add application {
+                                id = mockk()
+                                vaccine = vaccineMock
+                                createdOn = mockk()
+                                petWeight = mockk()
+                            }
+                        }
+
+                        applications.shouldNotBeNull().shouldNotBeEmpty()
+                        applications.size shouldBe 1
+                        applications shouldNotContain ("Name Test" to listOf(vaccineApplicationMock, slot.captured))
+
+                        verify {
+                            vaccineApplicationMock.toPair()
+                            vaccineMock pairNameWith capture(slot)
+                            vaccineApplicationMock mapStatusFrom any()
+                        }
+                    }
+                }
             }
-            fabrication = fabrication {
-                company = "Zoetis"
-                batch = Batch from "202/01"
-                expirationDate =  ExpirationDate from Period.ofMonths(1)
-            }
-        }
-
-        private val petWeight = PetWeight from 2.64
-
-        private val application = zoetisVaccine.apply(petWeight)
-    }
-
-    @BeforeEach
-    fun setup() {
-        ReflectionTestUtils.setField(
-            application,
-            "createdOn",
-            ApplicationDateTime.of(10, AUGUST, 2021, 10, 0)
-        )
-    }
-
-    @Nested
-    @DisplayName("Add entry")
-    inner class Add {
-
-        @Test
-        @DisplayName("successfully when vaccine name is different")
-        fun shouldAddApplicationWhenNameIsDifferent() {
-            val applications = Applications()
-            val anotherApplication = msdVaccine.apply(petWeight)
-
-            assertThatCode {
-                applications add application
-                applications add anotherApplication
-            }.doesNotThrowAnyException()
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(2)
-
-            assertThat(applications["Antirrábica"])
-                .isNotNull
-                .isNotEmpty
-                .contains(anotherApplication)
-                .size().isEqualTo(1)
-
-            assertThat(applications["Múltipla V10"])
-                .isNotNull
-                .isNotEmpty
-                .contains(application)
-                .size().isEqualTo(1)
-        }
-
-        @Test
-        @DisplayName("successfully when createdOn is after last application interval")
-        fun shouldAddApplicationWhenCreatedOnIsDifferent() {
-            val applications = Applications()
-
-            val anotherApplication = zoetisVaccine.apply(petWeight)
-            ReflectionTestUtils.setField(
-                anotherApplication,
-                "createdOn",
-                ApplicationDateTime.of(20, AUGUST, 2021, 10, 0)
-            )
-
-            assertThatCode {
-                applications add application
-                applications add anotherApplication
-            }.doesNotThrowAnyException()
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(1)
-
-            assertThat(applications["Múltipla V10"])
-                .isNotNull
-                .isNotEmpty
-                .contains(application, anotherApplication)
-                .size().isEqualTo(2)
-        }
-
-        @Test
-        @DisplayName("throw exception when application is duplicated")
-        fun shouldNotAddApplicationWhenItsDuplicated() {
-            val applications = Applications()
-
-            assertThatThrownBy {
-                applications add application
-                applications add application
-            }.isExactlyInstanceOf(InvalidApplicationException::class.java)
-                .hasMessage("Provided application already added")
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(1)
-
-            assertThat(applications["Múltipla V10"])
-                .isNotNull
-                .isNotEmpty
-                .contains(application)
-                .size().isEqualTo(1)
-        }
-
-        @Test
-        @DisplayName("throw exception when application is before today")
-        fun shouldNotAddApplicationWhenItsStatusIsBefore() {
-            val applications = Applications()
-            val anotherApplication = zoetisVaccine.apply(petWeight)
-
-            ReflectionTestUtils.setField(
-                anotherApplication,
-                "createdOn",
-                ApplicationDateTime.of(9, AUGUST, 2021, 10, 0)
-            )
-
-            assertThatThrownBy {
-                applications add application
-                applications add anotherApplication
-            }.isExactlyInstanceOf(InvalidApplicationException::class.java)
-                .hasMessage("Provided application is before today")
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(1)
-
-            assertThat(applications["Múltipla V10"])
-                .isNotNull
-                .isNotEmpty
-                .contains(application)
-                .size().isEqualTo(1)
-        }
-
-        @Test
-        @DisplayName("throw exception when application is before interval")
-        fun shouldNotAddApplicationWhenItsStatusIsInterval() {
-            val applications = Applications()
-            val anotherApplication = zoetisVaccine.apply(petWeight)
-
-            ReflectionTestUtils.setField(
-                anotherApplication,
-                "createdOn",
-                ApplicationDateTime.of(15, AUGUST, 2021, 10, 0)
-            )
-
-            assertThatThrownBy {
-                applications add application
-                applications add anotherApplication
-            }.isExactlyInstanceOf(InvalidApplicationException::class.java)
-                .hasMessage("Provided application cannot be added today")
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(1)
-
-            assertThat(applications["Múltipla V10"])
-                .isNotNull
-                .isNotEmpty
-                .contains(application)
-                .size().isEqualTo(1)
         }
     }
+    given("an application id to be removed") {
+        `when`("the id is found") {
+            then("it should be removed successfully") {
+                val slots = mutableListOf<VaccineApplication>()
+                val vaccineMock = mockk<Vaccine>()
+                every {
+                    vaccineMock pairNameWith capture(slots)
+                } answers { "Name Test" to slots.last() }
 
-    @Nested
-    @DisplayName("Remove entry")
-    inner class Remove {
+                val uuid = UUID.randomUUID()
+                val vaccineApplication = application {
+                    id = uuid
+                    vaccine = vaccineMock
+                    createdOn = mockk()
+                    petWeight = mockk()
+                }
 
-        @Test
-        @DisplayName("successfully by id when its found")
-        fun shouldRemoveApplicationById() {
-            val applications = Applications()
-            val newApplication = msdVaccine.apply(petWeight)
+                val applications = Applications()
+                applications add vaccineApplication
 
-            assertThatCode {
-                applications add application
-                applications add newApplication
-            }.doesNotThrowAnyException()
+                assertDoesNotThrow { applications deleteBy uuid }
 
-            assertThatCode { applications deleteBy application.id }
-                .doesNotThrowAnyException()
+                applications.shouldNotBeNull().shouldBeEmpty()
+                applications.size shouldBe 0
+                applications shouldNotContain ("Name Test" to listOf(vaccineApplication))
 
-            assertThat(applications["Múltipla V10"]).isNull()
-
-            assertThat(applications["Antirrábica"])
-                .isNotNull
-                .isNotEmpty
-                .contains(newApplication)
-                .size().isEqualTo(1)
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(1)
-        }
-
-        @Test
-        @DisplayName("throw NoSuchElementException when its not found")
-        fun shouldNotRemoveApplicationById() {
-            val applications = Applications()
-
-            assertThat(applications)
-                .isNotNull
-                .isEmpty()
-
-            assertThatThrownBy { applications deleteBy application.id }
-                .isExactlyInstanceOf(ApplicationNotFoundException::class.java)
-                .hasMessage("Vaccine Application not found")
-
-            assertThat(applications)
-                .isNotNull
-                .isEmpty()
+                verify { vaccineMock pairNameWith any() }
+            }
         }
     }
+})
 
-    @Nested
-    @DisplayName("Find entry")
-    inner class Find {
-
-        @Test
-        @DisplayName("successfully by id when its found")
-        fun shouldFindById() {
-            val applications = Applications()
-
-            assertThatCode {
-                applications add application
-                applications findBy application.id
-            }.doesNotThrowAnyException()
-
-            assertThat(applications)
-                .isNotNull
-                .isNotEmpty
-                .size().isEqualTo(1)
-
-            assertThat(applications["Múltipla V10"])
-                .isNotNull
-                .isNotEmpty
-                .contains(application)
-                .size().isEqualTo(1)
-        }
-
-        @Test
-        @DisplayName("return null when its not found")
-        fun shouldNotFindById() {
-            val applications = Applications()
-
-            assertThat(applications)
-                .isNotNull
-                .isEmpty()
-
-            assertThatCode {
-                val entry = applications findBy application.id
-                assertThat(entry).isNull()
-            }.doesNotThrowAnyException()
-
-            assertThat(applications)
-                .isNotNull
-                .isEmpty()
-        }
-    }
-
-    @Test
-    @DisplayName("successfully count all applications")
-    fun shouldCountAll() {
-        val applications = Applications()
-        val newApplication = msdVaccine.apply(petWeight)
-
-        assertThatCode {
-            applications add application
-            applications add newApplication
-        }.doesNotThrowAnyException()
-
-        assertThat(applications.countAll()).isEqualTo(2)
-    }
-}
+//    inner class Add {
+//
+//        @Test
+//        @DisplayName("successfully when vaccine name is different")
+//        fun shouldAddApplicationWhenNameIsDifferent() {
+//            val applications = Applications()
+//            val anotherApplication = msdVaccine.apply(petWeight)
+//
+//            assertThatCode {
+//                applications add application
+//                applications add anotherApplication
+//            }.doesNotThrowAnyException()
+//
+//            assertThat(applications)
+//                .isNotNull
+//                .isNotEmpty
+//                .size().isEqualTo(2)
+//
+//            assertThat(applications["Antirrábica"])
+//                .isNotNull
+//                .isNotEmpty
+//                .contains(anotherApplication)
+//                .size().isEqualTo(1)
+//
+//            assertThat(applications["Múltipla V10"])
+//                .isNotNull
+//                .isNotEmpty
+//                .contains(application)
+//                .size().isEqualTo(1)
+//        }
+//
+//
+//    @Nested
+//    @DisplayName("Remove entry")
+//    inner class Remove {
+//
+//        @Test
+//        @DisplayName("throw NoSuchElementException when its not found")
+//        fun shouldNotRemoveApplicationById() {
+//            val applications = Applications()
+//
+//            assertThat(applications)
+//                .isNotNull
+//                .isEmpty()
+//
+//            assertThatThrownBy { applications deleteBy application.id }
+//                .isExactlyInstanceOf(ApplicationNotFoundException::class.java)
+//                .hasMessage("Vaccine Application not found")
+//
+//            assertThat(applications)
+//                .isNotNull
+//                .isEmpty()
+//        }
+//    }
+//
+//    @Nested
+//    @DisplayName("Find entry")
+//    inner class Find {
+//
+//        @Test
+//        @DisplayName("successfully by id when its found")
+//        fun shouldFindById() {
+//            val applications = Applications()
+//
+//            assertThatCode {
+//                applications add application
+//                applications findBy application.id
+//            }.doesNotThrowAnyException()
+//
+//            assertThat(applications)
+//                .isNotNull
+//                .isNotEmpty
+//                .size().isEqualTo(1)
+//
+//            assertThat(applications["Múltipla V10"])
+//                .isNotNull
+//                .isNotEmpty
+//                .contains(application)
+//                .size().isEqualTo(1)
+//        }
+//
+//        @Test
+//        @DisplayName("return null when its not found")
+//        fun shouldNotFindById() {
+//            val applications = Applications()
+//
+//            assertThat(applications)
+//                .isNotNull
+//                .isEmpty()
+//
+//            assertThatCode {
+//                val entry = applications findBy application.id
+//                assertThat(entry).isNull()
+//            }.doesNotThrowAnyException()
+//
+//            assertThat(applications)
+//                .isNotNull
+//                .isEmpty()
+//        }
+//    }
+//
+//    @Test
+//    @DisplayName("successfully count all applications")
+//    fun shouldCountAll() {
+//        val applications = Applications()
+//        val newApplication = msdVaccine.apply(petWeight)
+//
+//        assertThatCode {
+//            applications add application
+//            applications add newApplication
+//        }.doesNotThrowAnyException()
+//
+//        assertThat(applications.countAll()).isEqualTo(2)
+//    }
+//}

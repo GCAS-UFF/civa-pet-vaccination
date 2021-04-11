@@ -8,24 +8,25 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
     infix fun add(entry: VaccineApplication) {
         val (vaccineName, newApplication) = entry.toPair()
 
-        val status = this[vaccineName]
-            ?.map { it mapStatusFrom newApplication }
-            ?.lastOrNull { it != VALID }
-
-        when (status) {
+        when (val status = this.mapStatus(vaccineName, newApplication)) {
             null -> this.save(vaccineName, newApplication)
             else -> throw InvalidApplicationException from status
         }
     }
 
-    infix fun findBy(applicationId: UUID): VaccineApplication? {
+    private fun mapStatus(vaccineName: String, newApplication: VaccineApplication) =
+        this[vaccineName]
+            ?.map { it mapStatusFrom newApplication }
+            ?.lastOrNull { it != VALID }
+
+    infix fun findBy(id: UUID): VaccineApplication? {
         return this.flatMap { it.value }
-            .firstOrNull { it.id == applicationId }
+            .firstOrNull { it.id == id }
     }
 
-    infix fun deleteBy(applicationId: UUID) {
-        when (val application = this findBy applicationId) {
-            null -> throw ApplicationNotFoundException from applicationId
+    infix fun deleteBy(id: UUID) {
+        when (val application = this findBy id) {
+            null -> throw ApplicationNotFoundException from id
             else -> this delete application
         }
     }
@@ -36,7 +37,7 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
         val filteredApplications = this[vaccineName] minus application
 
         when (filteredApplications?.size) {
-            null ->  throw ApplicationNotFoundException from application.id
+            null -> throw ApplicationNotFoundException from application.id
             0 -> this.remove(vaccineName)
             else -> this[vaccineName] = filteredApplications
         }
