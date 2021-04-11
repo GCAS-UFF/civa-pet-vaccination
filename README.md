@@ -7,7 +7,8 @@ The vaccination card is the root aggregate of the microservice
 The main idea is to build a reactive microservice.
 
 Patterns employed:
-- Domain Driven Design
+- Domain Driven Design (DDD)
+- Behavior Driven Development (BDD)
 - Hexagonal Architecture
 - CI/CD
 
