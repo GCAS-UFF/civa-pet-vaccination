@@ -4,9 +4,9 @@ import java.util.*
 
 interface VaccineApplicationVisitor {
 
-    fun seeId(id: UUID)
-    fun seeVaccine(vaccine: Vaccine)
-    fun seePetWeight(petWeight: PetWeight)
-    fun seeCreatedOn(createdOn: ApplicationDateTime)
+    infix fun seeId(id: UUID)
+    infix fun seeVaccine(vaccine: Vaccine)
+    infix fun seePetWeight(petWeight: PetWeight)
+    infix fun seeCreatedOn(createdOn: ApplicationDateTime)
 
 }

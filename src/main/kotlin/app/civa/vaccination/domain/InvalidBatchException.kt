@@ -11,7 +11,7 @@ class InvalidBatchException(
         infix fun from(value: String) =
             InvalidBatchException(
                 message = "Batch doesn't match required pattern",
-                expected = "999/99",
+                expected = "ddd/dd",
                 actual = value
             )
     }

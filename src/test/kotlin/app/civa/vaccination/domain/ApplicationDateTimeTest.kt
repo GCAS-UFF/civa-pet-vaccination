@@ -1,57 +1,69 @@
 package app.civa.vaccination.domain
 
-import app.civa.vaccination.domain.ApplicationDateTime.Companion.VACCINATION_INTERVAL_DAYS
-import app.civa.vaccination.domain.DateTimeStatus.*
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 import java.time.Month.AUGUST
 
-@DisplayName("Application Date Time should")
-internal class ApplicationDateTimeTest {
+class ApplicationDateTimeTest : BehaviorSpec({
+    given("an application date time") {
+        val dateTime = ApplicationDateTime.of(
+            day = GIVEN_DAY, month = AUGUST, year = 2021,
+            hour = 16, minute = 0
+        )
 
+        `when`("the difference of days is greater or equal than $VACCINATION_INTERVAL_DAYS") {
+            val day = GIVEN_DAY + VACCINATION_INTERVAL_DAYS
+
+            then("it should map to VALID") {
+                val other = ApplicationDateTime.of(
+                    day = day,
+                    month = AUGUST, year = 2021,
+                    hour = 16, minute = 0
+                )
+                dateTime mapStatus other shouldBe DateTimeStatus.VALID
+            }
+        }
+
+        `when`("the difference of days is less than $VACCINATION_INTERVAL_DAYS") {
+            val day = GIVEN_DAY + VACCINATION_INTERVAL_DAYS - 1
+
+            then("it should map to INTERVAL") {
+                val other = ApplicationDateTime.of(
+                    day = day,
+                    month = AUGUST, year = 2021,
+                    hour = 16, minute = 0
+                )
+                dateTime mapStatus other shouldBe DateTimeStatus.INTERVAL
+            }
+        }
+
+        `when`("there's no difference of days") {
+            val day = GIVEN_DAY
+
+            then("it should map to SAME") {
+                val other = ApplicationDateTime.of(
+                    day = day, month = AUGUST, year = 2021,
+                    hour = 16, minute = 0
+                )
+                dateTime mapStatus other shouldBe DateTimeStatus.SAME
+            }
+        }
+
+        `when`("it's before given date time") {
+            val day = GIVEN_DAY - 1
+
+            then("it should map to BEFORE") {
+                val other = ApplicationDateTime.of(
+                    day = day, month = AUGUST, year = 2021,
+                    hour = 16, minute = 0
+                )
+                dateTime mapStatus other shouldBe DateTimeStatus.BEFORE
+            }
+        }
+    }
+}) {
     companion object {
-
-        private val a1 = ApplicationDateTime.of(10, AUGUST, 2021, 16, 0)
-    }
-
-    @Test
-    @DisplayName("be SAME_DAY and equal when there's no difference of days")
-    fun statusSameDay() {
-        val a2 = ApplicationDateTime.of(10, AUGUST, 2021, 16, 0)
-
-        assertThat(a1.mapStatus(a2)).isEqualTo(SAME)
-        assertThat(a2.mapStatus(a1)).isEqualTo(SAME)
-    }
-
-
-    @Test
-    @DisplayName("be BEFORE_TODAY and equal when application is before now")
-    fun statusBeforeToday() {
-        val a2 = ApplicationDateTime.of(9, AUGUST, 2021, 16, 0)
-
-        assertThat(a1.mapStatus(a2)).isEqualTo(BEFORE)
-    }
-
-    @Test
-    @DisplayName(
-        "be INTERVAL and equal when the difference of days is less than" +
-        "$VACCINATION_INTERVAL_DAYS"
-    )
-    fun compareToShouldBeEqualInterval() {
-        val a2 = ApplicationDateTime.of(15, AUGUST, 2021, 16, 0)
-
-        assertThat(a1.mapStatus(a2)).isEqualTo(INTERVAL)
-    }
-
-    @Test
-    @DisplayName(
-        "be VALID and not equal when the difference of days is more than" +
-        "$VACCINATION_INTERVAL_DAYS"
-    )
-    fun compareToShouldNotBeEqual() {
-        val a2 = ApplicationDateTime.of(20, AUGUST, 2021, 16, 0)
-
-        assertThat(a1.mapStatus(a2)).isEqualTo(VALID)
+        private const val GIVEN_DAY = 10
+        private const val VACCINATION_INTERVAL_DAYS = 7
     }
 }

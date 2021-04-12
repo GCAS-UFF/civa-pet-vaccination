@@ -6,7 +6,7 @@ import java.time.ZoneOffset.UTC
 
 class ExpirationDate
 private constructor(
-    private val expirationDate: LocalDate
+    private val date: LocalDate
 ) {
 
     companion object {
@@ -18,10 +18,12 @@ private constructor(
         )
     }
 
-    fun mustBeValid() = apply { expirationDate.mustBeValid() }
+    fun mustBeValid() = apply {
+        date.mustBeValid()
+    }
 
-    override fun toString() = "ExpirationDate(value=$expirationDate)"
-
+    override fun toString() =
+        "ExpirationDate(value=$date)"
 }
 
 private fun LocalDate.hasExpired(): Boolean {
@@ -30,5 +32,7 @@ private fun LocalDate.hasExpired(): Boolean {
 }
 
 private fun LocalDate.mustBeValid() = apply {
-    if (this.hasExpired()) throw VaccineExpiredException from this
+    if (this.hasExpired()) {
+        throw ExpiredVaccineException from this
+    }
 }

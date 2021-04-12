@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val kotestVersion = "4.4.1"
+
 plugins {
 	id("org.springframework.boot") version "2.4.3"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
@@ -30,6 +32,9 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
+	testImplementation ("io.kotest:kotest-runner-junit5:$kotestVersion")
+	testImplementation ("io.kotest:kotest-assertions-core:$kotestVersion")
+	testImplementation("io.mockk:mockk:1.10.6")
 }
 
 dependencyManagement {

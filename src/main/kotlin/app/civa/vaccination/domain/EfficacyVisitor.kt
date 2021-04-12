@@ -2,7 +2,6 @@ package app.civa.vaccination.domain
 
 interface EfficacyVisitor {
 
-    fun seeSpecies(species: Collection<Species>)
-    fun seeAgents(agents: Collection<String>)
-
+    infix fun seeSpecies(species: Collection<Species>)
+    infix fun seeAgents(agents: Collection<String>)
 }

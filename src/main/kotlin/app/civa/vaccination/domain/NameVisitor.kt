@@ -2,7 +2,6 @@ package app.civa.vaccination.domain
 
 interface NameVisitor {
 
-    fun visitClassification(reference: String)
-    fun visitCommercial(commercial: String)
-
+    infix fun seeClassification(reference: String)
+    infix fun seeCommercial(commercial: String)
 }

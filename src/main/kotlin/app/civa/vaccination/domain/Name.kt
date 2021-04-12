@@ -19,18 +19,26 @@ private constructor(
         }
     }
 
-    fun accept(visitor: NameVisitor) {
-        visitor.visitClassification(classification)
-        visitor.visitCommercial(commercial)
+    infix fun accepts(visitor: NameVisitor) {
+        visitor.seeClassification(classification)
+        visitor.seeCommercial(commercial)
     }
 
     infix fun pairWith(application: VaccineApplication) =
         this.classification to application
 
+    override fun toString() =
+        "Name(classification='$classification', commercial='$commercial')"
+
 }
 
 fun name(lambda: NameBuilder.() -> Unit): Name {
-    val builder = NameEntityBuilder()
+    val builder = object : NameBuilder {
+        override lateinit var classification: String
+        override lateinit var commercial: String
+
+        override fun build() = Name(this)
+    }
     builder.lambda()
     return builder.build()
 }
