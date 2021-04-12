@@ -1,100 +1,107 @@
 package app.civa.vaccination.domain
 
-import org.assertj.core.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.springframework.test.util.ReflectionTestUtils
-import java.time.Month.AUGUST
-import java.time.Period
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrowExactly
+import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.*
 import java.util.*
 
-@DisplayName("Vaccination Card")
-internal class VaccinationCardTest {
-
-    companion object {
-
-        private val vaccine = vaccine {
-            name = name {
-                classification = "Antirrábica"
-                commercial = "Nobivac® Raiva"
-            }
-            efficacy = efficacy {
-                species = setOf(Species.FELINE, Species.CANINE)
-                agents = setOf("Raiva")
-            }
-            fabrication = fabrication {
-                company = "MSD"
-                batch = Batch from "200/21"
-                expirationDate = ExpirationDate from Period.ofMonths(6)
+class VaccinationCardTest : BehaviorSpec({
+    given("a pair of petId and species") {
+        then("it should be able to create a new vaccination card") {
+            shouldNotThrowAny {
+                val card = VaccinationCard of (UUID.randomUUID() to Species.CANINE)
+                card.shouldNotBeNull()
+                card.shouldBeInstanceOf<VaccinationCard>()
             }
         }
-
-        private val petWeight = PetWeight from 4.67
-
-        private val application = vaccine.apply(petWeight)
     }
+    given("an empty vaccination card") {
+        `when`("a valid application is added") {
+            then("it should be added successfully") {
+                val vaccineApplicationMock = mockk<VaccineApplication>()
+                every {
+                    vaccineApplicationMock mustMatch Species.CANINE
+                } returns vaccineApplicationMock
 
-    @BeforeEach
-    fun setup() {
-        ReflectionTestUtils.setField(
-            application, "createdOn",
-            ApplicationDateTime.of(10, AUGUST, 2021, 10, 0)
-        )
+                val applicationsMock = mockk<Applications>()
+                every { applicationsMock add vaccineApplicationMock } just Runs
+
+                val card = vaccinationCard {
+                    id = UUID.randomUUID()
+                    petId = UUID.randomUUID()
+                    species = Species.CANINE
+                    applications = applicationsMock
+                }
+
+                shouldNotThrowAny { card add vaccineApplicationMock }
+
+                verify(exactly = 1) {
+                    vaccineApplicationMock mustMatch Species.CANINE
+                    applicationsMock add vaccineApplicationMock
+                }
+            }
+        }
+        `when`("an application is removed") {
+            then("it should not be removed successfully") {
+                val applicationsMock = mockk<Applications>()
+                every {
+                    applicationsMock deleteBy any()
+                } throws ApplicationNotFoundException("Test Message", "Expected", "Actual")
+
+                shouldThrowExactly<ApplicationNotFoundException> {
+                    vaccinationCard {
+                        id = UUID.randomUUID()
+                        petId = UUID.randomUUID()
+                        species = Species.CANINE
+                        applications = applicationsMock
+                    } deleteBy UUID.randomUUID()
+                }
+
+                verify(exactly = 1) { applicationsMock deleteBy any() }
+            }
+        }
+        `when`("an application is searched for") {
+            then("it should not be found") {
+                val applicationsMock = mockk<Applications>()
+                every {
+                    applicationsMock findBy any()
+                } throws ApplicationNotFoundException("Test Message", "Expected", "Actual")
+
+                shouldThrowExactly<ApplicationNotFoundException> {
+                    vaccinationCard {
+                        id = UUID.randomUUID()
+                        petId = UUID.randomUUID()
+                        species = Species.CANINE
+                        applications = applicationsMock
+                    } findBy UUID.randomUUID()
+                }
+
+                verify(exactly = 1) { applicationsMock findBy any() }
+            }
+        }
     }
+    given("a valid vaccination card instance") {
+        `when`("it accepts a visitor") {
+            then("visitor methods should be called sequentially") {
+                val visitorMock = mockk<VaccinationCardVisitor>()
+                every { visitorMock.seeId(any()) } just Runs
+                every { visitorMock.seePetId(any()) } just Runs
+                every { visitorMock.seeSpecies(any()) } just Runs
+                every { visitorMock.seeApplications(any()) } just Runs
 
-    @Test
-    @DisplayName("should add an application when card is empty")
-    fun shouldAddWhenEmpty() {
-        val petID = UUID.randomUUID()
-        val card = VaccinationCard(petID, Species.CANINE)
+                val card = VaccinationCard of (UUID.randomUUID() to Species.CANINE)
+                shouldNotThrowAny { card accepts visitorMock }
 
-        assertThat(card).isNotNull
-            .isExactlyInstanceOf(VaccinationCard::class.java)
-            .hasFieldOrPropertyWithValue("species", Species.CANINE)
-            .hasFieldOrPropertyWithValue("petID", petID)
-
-        assertThatCode { card add application }
-            .doesNotThrowAnyException()
-
+                verifySequence {
+                    visitorMock.seeId(any())
+                    visitorMock.seePetId(any())
+                    visitorMock.seeSpecies(any())
+                    visitorMock.seeApplications(any())
+                }
+            }
+        }
     }
-
-    @Test
-    @DisplayName("should add an application when its after interval")
-    fun shouldAddWhenValid() {
-        val card = VaccinationCard(UUID.randomUUID(), Species.CANINE)
-
-        val validApplication = vaccine.apply(petWeight)
-
-        ReflectionTestUtils.setField(
-            validApplication, "createdOn",
-            ApplicationDateTime.of(21, AUGUST, 2021, 10, 1)
-        )
-
-        assertThatCode {
-            card add application
-            card add validApplication
-        }.doesNotThrowAnyException()
-    }
-
-    @Test
-    @DisplayName("should throw IllegalApplicationException when its added before interval")
-    fun shouldThrowIllegalApplicationException() {
-        val card = VaccinationCard(UUID.randomUUID(), Species.CANINE)
-
-        assertThatCode { card add application }
-            .doesNotThrowAnyException()
-
-        val applicationOnInterval = vaccine.apply(petWeight)
-
-        ReflectionTestUtils.setField(
-            applicationOnInterval, "createdOn",
-            ApplicationDateTime.of(15, AUGUST, 2021, 10, 0)
-        )
-
-        assertThatThrownBy { card add applicationOnInterval }
-            .isExactlyInstanceOf(InvalidApplicationException::class.java)
-            .isInstanceOf(DomainException::class.java)
-            .hasMessage("Provided application cannot be added today")
-    }
-}
+})

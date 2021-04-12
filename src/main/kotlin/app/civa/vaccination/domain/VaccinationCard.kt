@@ -1,7 +1,6 @@
 package app.civa.vaccination.domain
 
 import java.util.*
-import kotlin.jvm.Throws
 
 class VaccinationCard
 private constructor(
@@ -10,12 +9,17 @@ private constructor(
     private val species: Species,
     private val applications: Applications
 ) {
-    constructor(petID: UUID, species: Species) : this(
-        UUID.randomUUID(),
-        petID,
-        species,
-        Applications()
-    )
+    companion object {
+        infix fun of(petEntry: Pair<UUID, Species>): VaccinationCard {
+            val (petId, species) = petEntry
+            return VaccinationCard(
+                UUID.randomUUID(),
+                petId,
+                species,
+                Applications()
+            )
+        }
+    }
 
     constructor(builder: VaccinationCardBuilder) : this(
         builder.id,
@@ -24,7 +28,7 @@ private constructor(
         builder.applications
     )
 
-    fun accept(visitor: VaccinationCardVisitor) {
+    infix fun accepts(visitor: VaccinationCardVisitor) {
         visitor.seeId(id)
         visitor.seePetId(petID)
         visitor.seeSpecies(species)
@@ -34,7 +38,7 @@ private constructor(
     infix fun add(application: VaccineApplication) =
         applications add application.mustMatch(species)
 
-    infix fun removeBy(applicationId: UUID) =
+    infix fun deleteBy(applicationId: UUID) =
         applications deleteBy applicationId
 
     infix fun findBy(applicationId: UUID) =
@@ -42,7 +46,20 @@ private constructor(
 
     override fun toString() =
         "VaccinationCard(id=$id, " +
-        "petID=$petID, " +
-        "species=$species, " +
-        "applications=$applications"
+                "petID=$petID, " +
+                "species=$species, " +
+                "applications=$applications"
+}
+
+fun vaccinationCard(lambda: VaccinationCardBuilder.() -> Unit): VaccinationCard {
+    val builder = object : VaccinationCardBuilder {
+        override lateinit var id: UUID
+        override lateinit var petId: UUID
+        override lateinit var species: Species
+        override lateinit var applications: Applications
+
+        override fun build() = VaccinationCard(this)
+    }
+    builder.lambda()
+    return builder.build()
 }

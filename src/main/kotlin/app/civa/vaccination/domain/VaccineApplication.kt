@@ -52,6 +52,7 @@ private constructor(
 
 infix fun Collection<VaccineApplication>?.minus(application: VaccineApplication) =
     this?.filter { it.id != application.id }
+        ?: throw ApplicationNotFoundException from application.id
 
 fun application(lambda: VaccineApplicationBuilder.() -> Unit): VaccineApplication {
     val builder = object : VaccineApplicationBuilder {

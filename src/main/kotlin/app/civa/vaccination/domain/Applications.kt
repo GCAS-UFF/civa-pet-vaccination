@@ -19,19 +19,18 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
             ?.map { it mapStatusFrom newApplication }
             ?.lastOrNull { it != VALID }
 
-    infix fun findBy(id: UUID): VaccineApplication {
-        return this.flatMap { it.value }
+    infix fun findBy(id: UUID) =
+         this.flatMap { it.value }
             .firstOrNull { it.id == id }
             ?: throw ApplicationNotFoundException from id
-    }
+
 
     infix fun deleteBy(id: UUID) {
         val (vaccineName, application) = this.findBy(id).toPair()
 
         val filteredApplications = this[vaccineName] minus application
 
-        when (filteredApplications?.size) {
-            null -> throw ApplicationNotFoundException from id
+        when (filteredApplications.size) {
             0 -> this.remove(vaccineName)
             else -> this[vaccineName] = filteredApplications
         }
