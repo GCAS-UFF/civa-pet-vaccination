@@ -11,7 +11,7 @@ constructor(private val value: LocalDateTime) {
 
     companion object {
 
-        const val VACCINATION_INTERVAL_DAYS: Long = 10
+        private const val VACCINATION_INTERVAL_DAYS: Long = 7
 
         fun now() = ApplicationDateTime(LocalDateTime.now(UTC))
 
