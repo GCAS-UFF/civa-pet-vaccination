@@ -3,9 +3,13 @@ package app.civa.vaccination.domain
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrowExactly
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldBeSameInstanceAs
+import io.kotest.matchers.types.shouldNotBeSameInstanceAs
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.time.LocalDate
 import java.time.ZoneOffset.UTC
 import kotlin.random.Random
@@ -53,18 +57,46 @@ class VaccineControlTest : BehaviorSpec({
             }
         }
     }
-    given("a vaccine control") {
-        val vaccineMock = mockk<Vaccine>()
-        every { vaccineMock.mustBeValid() } returns vaccineMock
-
-        val control = VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
-
+    given("a new vaccine control") {
         `when`("a certain quantity is added") {
-            val quantity = Random.nextInt(1, 100)
-
             then("it should return a new control with updated quantity") {
+                val vaccineMock = mockk<Vaccine>()
+                every { vaccineMock.mustBeValid() } returns vaccineMock
+
+                val control = VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
+                val quantity = Random.nextInt(1, 100)
+
                 shouldNotThrowAny {
-                    control increaseBy quantity
+                    val updatedControl = control increaseBy quantity
+
+                    updatedControl.shouldNotBeNull() shouldNotBeSameInstanceAs control
+                    updatedControl.shouldBeInstanceOf<VaccineControl>()
+                }
+                verify(exactly = 2) {
+                    vaccineMock.mustBeValid()
+                }
+            }
+        }
+    }
+    given("a vaccine control") {
+        `when`("a certain quantity is retrieved") {
+            then("it should return a pair of control with updated quantity and vaccine") {
+                val vaccineMock = mockk<Vaccine>()
+                every { vaccineMock.mustBeValid() } returns vaccineMock
+
+                val control = VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
+
+                shouldNotThrowAny {
+                    val (updatedControl, vaccine) = control.retrieve(1)
+
+                    updatedControl.shouldNotBeNull() shouldNotBeSameInstanceAs control
+                    updatedControl.shouldBeInstanceOf<VaccineControl>()
+
+                    vaccine.shouldNotBeNull() shouldBeSameInstanceAs vaccineMock
+                }
+
+                verify(exactly = 2) {
+                    vaccineMock.mustBeValid()
                 }
             }
         }
