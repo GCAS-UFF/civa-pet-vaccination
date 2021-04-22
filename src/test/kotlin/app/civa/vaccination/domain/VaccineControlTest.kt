@@ -72,22 +72,22 @@ class VaccineControlTest : BehaviorSpec({
                     updatedControl.shouldNotBeNull() shouldNotBeSameInstanceAs control
                     updatedControl.shouldBeInstanceOf<VaccineControl>()
                 }
-                verify(exactly = 2) {
-                    vaccineMock.mustBeValid()
-                }
+
+                verify(exactly = 2) { vaccineMock.mustBeValid() }
             }
         }
     }
-    given("a vaccine control") {
+    given("a vaccine control with enough quantity") {
         `when`("a certain quantity is retrieved") {
             then("it should return a pair of control with updated quantity and vaccine") {
                 val vaccineMock = mockk<Vaccine>()
                 every { vaccineMock.mustBeValid() } returns vaccineMock
 
-                val control = VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
+                val quantity = Random.nextInt(1, 100)
+                val control = VaccineControl.from(quantity, vaccineMock)
 
                 shouldNotThrowAny {
-                    val (updatedControl, vaccine) = control.retrieve(1)
+                    val (updatedControl, vaccine) = control.retrieve(quantity - 1)
 
                     updatedControl.shouldNotBeNull() shouldNotBeSameInstanceAs control
                     updatedControl.shouldBeInstanceOf<VaccineControl>()
@@ -95,9 +95,68 @@ class VaccineControlTest : BehaviorSpec({
                     vaccine.shouldNotBeNull() shouldBeSameInstanceAs vaccineMock
                 }
 
-                verify(exactly = 2) {
-                    vaccineMock.mustBeValid()
+                verify(exactly = 2) { vaccineMock.mustBeValid() }
+            }
+        }
+        `when`("its asked to retrieve a vaccine") {
+            then("it should return a pair of control with updated quantity and vaccine") {
+                val vaccineMock = mockk<Vaccine>()
+                every { vaccineMock.mustBeValid() } returns vaccineMock
+
+                val control = VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
+
+                shouldNotThrowAny {
+                    val (updatedControl, vaccine) = control.retrieve()
+
+                    updatedControl.shouldNotBeNull() shouldNotBeSameInstanceAs control
+                    updatedControl.shouldBeInstanceOf<VaccineControl>()
+
+                    vaccine.shouldNotBeNull() shouldBeSameInstanceAs vaccineMock
                 }
+
+                verify(exactly = 2) { vaccineMock.mustBeValid() }
+            }
+        }
+        `when`("its asked to retrieve a negative quantity") {
+            then("it should not update quantity") {
+                val vaccineMock = mockk<Vaccine>()
+                every { vaccineMock.mustBeValid() } returns vaccineMock
+
+                val control = VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
+
+                shouldThrowExactly<IllegalQuantityException> {
+                    control.retrieve(-2)
+                }
+
+                verify(exactly = 1) { vaccineMock.mustBeValid() }
+            }
+        }
+        `when`("its given an expired vaccine") {
+            then("it should not accept") {
+                val vaccineMock = mockk<Vaccine>()
+                every {
+                    vaccineMock.mustBeValid()
+                } throws ExpiredVaccineException("Test expiration message", "E", "A")
+
+                shouldThrowExactly<ExpiredVaccineException> {
+                    VaccineControl.from(Random.nextInt(1, 100), vaccineMock)
+                }
+
+                verify(exactly = 1) { vaccineMock.mustBeValid() }
+            }
+        }
+    }
+    given("a vaccine control with zero quantity") {
+        `when`("its asked to retrieve a vaccine") {
+            then("it should fail to retrieve") {
+                val vaccineMock = mockk<Vaccine>()
+                every { vaccineMock.mustBeValid() } returns vaccineMock
+
+                val (control, _) = VaccineControl.from(1, vaccineMock).retrieve()
+
+                shouldThrowExactly<IllegalQuantityException> { control.retrieve() }
+
+                verify(exactly = 2) { vaccineMock.mustBeValid() }
             }
         }
     }
