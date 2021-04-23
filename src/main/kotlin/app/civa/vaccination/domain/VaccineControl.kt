@@ -15,7 +15,7 @@ import java.util.*
  */
 class VaccineControl
 private constructor(
-    private val id: UUID,
+    val id: UUID,
     private val quantity: Int,
     private val vaccine: Vaccine
 ) {
@@ -23,6 +23,7 @@ private constructor(
      * Increases [quantity] if the value provided is positive.
      * @return a new instance of [VaccineControl] with updated [quantity]
      * @throws IllegalQuantityException when the [quantityToBeAdded] provided is not positive.
+     * @throws ExpiredVaccineException when the [vaccine] has already expired.
      */
     infix fun increaseBy(quantityToBeAdded: Int) = VaccineControl(
         id,
@@ -47,6 +48,8 @@ private constructor(
         this.quantity mustHaveEnough quantityWanted.mustBePositive()
         return this.quantity - quantityWanted
     }
+
+    fun toPair() = vaccine pairNameWith this
 
     companion object {
         /**

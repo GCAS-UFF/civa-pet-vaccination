@@ -26,7 +26,6 @@ class Applications : HashMap<String, Collection<VaccineApplication>>(MAX_VACCINE
             .firstOrNull { it.id == id }
             ?: throw ApplicationNotFoundException from id
 
-
     infix fun deleteBy(id: UUID) {
         val (vaccineName, application) = this.findBy(id).toPair()
 
