@@ -163,7 +163,7 @@ class ApplicationsTest : BehaviorSpec({
                     applications.shouldNotBeNull().shouldBeEmpty()
                     applications shouldNotContain ("Name Test" to listOf(vaccineApplication))
 
-                    verify { vaccineMock pairNameWith any() }
+                    verify { vaccineMock pairNameWith ofType<VaccineApplication>() }
                 }
             }
             and("there's more than one application with the same name") {
@@ -199,7 +199,7 @@ class ApplicationsTest : BehaviorSpec({
                     applications.shouldNotBeNull().shouldNotBeEmpty()
                     applications shouldNotContain ("Name Test" to listOf(vaccineApplication))
 
-                    verify { vaccineMock pairNameWith any() }
+                    verify { vaccineMock pairNameWith ofType<VaccineApplication>() }
                 }
             }
         }

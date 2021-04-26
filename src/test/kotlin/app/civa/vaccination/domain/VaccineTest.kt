@@ -149,7 +149,7 @@ class VaccineTest : BehaviorSpec({
                 val applicationMock = mockk<VaccineApplication>()
 
                 val nameMock = mockk<Name>()
-                every { nameMock pairWith any() } returns
+                every { nameMock pairWith ofType<VaccineApplication>() } returns
                         ("Antirrábica" to applicationMock)
 
                 val pair = vaccine {
@@ -161,7 +161,7 @@ class VaccineTest : BehaviorSpec({
                 pair.first shouldBe "Antirrábica"
                 pair.second shouldBeSameInstanceAs applicationMock
 
-                verify(exactly = 1) { nameMock.pairWith(any()) }
+                verify(exactly = 1) { nameMock pairWith ofType<VaccineApplication>() }
             }
         }
     }

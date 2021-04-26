@@ -3,7 +3,9 @@ package app.civa.vaccination.domain
 import app.civa.vaccination.domain.DateTimeStatus.VALID
 import java.util.*
 
-class Applications : HashMap<String, Collection<VaccineApplication>>() {
+const val MAX_VACCINES = 8
+
+class Applications : HashMap<String, Collection<VaccineApplication>>(MAX_VACCINES) {
 
     infix fun add(entry: VaccineApplication) {
         val (vaccineName, newApplication) = entry.toPair()
@@ -23,7 +25,6 @@ class Applications : HashMap<String, Collection<VaccineApplication>>() {
          this.flatMap { it.value }
             .firstOrNull { it.id == id }
             ?: throw ApplicationNotFoundException from id
-
 
     infix fun deleteBy(id: UUID) {
         val (vaccineName, application) = this.findBy(id).toPair()

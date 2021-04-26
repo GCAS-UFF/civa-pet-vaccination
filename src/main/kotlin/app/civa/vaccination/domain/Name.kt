@@ -27,9 +27,11 @@ private constructor(
     infix fun pairWith(application: VaccineApplication) =
         this.classification to application
 
+    infix fun pairWith(control: VaccineControl) =
+        this.classification to control
+
     override fun toString() =
         "Name(classification='$classification', commercial='$commercial')"
-
 }
 
 fun name(lambda: NameBuilder.() -> Unit): Name {

@@ -25,6 +25,9 @@ private constructor(
     infix fun pairNameWith(application: VaccineApplication) =
         name pairWith application
 
+    infix fun pairNameWith(control: VaccineControl) =
+        name pairWith control
+
     infix fun mustMatch(species: Species) = apply {
         efficacy mustMatch species
     }
