@@ -2,11 +2,14 @@ package app.civa.vaccination.domain
 
 import java.util.*
 
-class Inventory : HashMap<String, Collection<VaccineControl>>() {
-    fun add(vaccine: Vaccine, quantity: Int = 1) {
+class Stash : HashMap<String, Collection<VaccineControl>>() {
+
+    fun add(vaccine: Vaccine, quantity: Int = 1): VaccineControl {
         val (vaccineName, control) = VaccineControl.from(quantity, vaccine).toPair()
 
         this.merge(vaccineName, setOf(control)) { A, B -> A union B }
+
+        return control
     }
 
     infix fun findVaccineByName(vaccineName: String) =
@@ -18,13 +21,16 @@ class Inventory : HashMap<String, Collection<VaccineControl>>() {
             .firstOrNull { it.id == id }
             ?: throw VaccineControlNotFoundException from id
 
-    fun increaseStock(quantity: Int = 1, id: UUID) {
+    fun increaseStock(id: UUID, quantity: Int = 1): VaccineControl {
         val (vaccineName, control) = this.findVaccineControlById(id).toPair()
 
-        this.updateInventory(vaccineName, control.increaseBy(quantity))
+        val updatedControl = control.increaseBy(quantity)
+        this.updateInventory(vaccineName, updatedControl)
+
+        return updatedControl
     }
 
-    fun retrieve(quantity: Int = 1, id: UUID): Vaccine {
+    fun retrieve(id: UUID, quantity: Int = 1): Vaccine {
         val (vaccineName, control) = this.findVaccineControlById(id).toPair()
         val (updatedControl, vaccine) = control.retrieve(quantity)
 
