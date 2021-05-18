@@ -40,30 +40,6 @@ class VaccineApplicationTest : BehaviorSpec({
         }
     }
     given("a vaccine application") {
-        `when`("toPair method is called") {
-            then("it should return a pair of vaccine name and application") {
-                val slot = slot<VaccineApplication>()
-                val vaccineMock = mockk<Vaccine>()
-
-                every {
-                    vaccineMock pairNameWith capture(slot)
-                } answers { "Name test" to slot.captured }
-
-                val application = application {
-                    id = mockk()
-                    vaccine = vaccineMock
-                    petWeight = mockk()
-                    createdOn = mockk()
-                }
-
-                val (name, applicationFromPair) = application.toPair()
-
-                name shouldBe "Name test"
-                applicationFromPair shouldBeSameInstanceAs application
-
-                verify(exactly = 1) { vaccineMock pairNameWith application }
-            }
-        }
         `when`("a matching species is provided") {
             then("it must match") {
                 val vaccineMock = mockk<Vaccine>()

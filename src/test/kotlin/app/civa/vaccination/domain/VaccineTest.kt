@@ -143,28 +143,6 @@ class VaccineTest : BehaviorSpec({
             }
         }
     }
-    given("a vaccine application") {
-        `when`("it pairs with a Vaccine name") {
-            then("it should return the pair") {
-                val applicationMock = mockk<VaccineApplication>()
-
-                val nameMock = mockk<Name>()
-                every { nameMock pairWith ofType<VaccineApplication>() } returns
-                        ("Antirrábica" to applicationMock)
-
-                val pair = vaccine {
-                    name = nameMock
-                    efficacy = mockk()
-                    fabrication = mockk()
-                } pairNameWith applicationMock
-
-                pair.first shouldBe "Antirrábica"
-                pair.second shouldBeSameInstanceAs applicationMock
-
-                verify(exactly = 1) { nameMock pairWith ofType<VaccineApplication>() }
-            }
-        }
-    }
     given("a valid instance of Vaccine") {
         `when`("it accepts a VaccineVisitor") {
             then("visitor methods should be called in sequence") {

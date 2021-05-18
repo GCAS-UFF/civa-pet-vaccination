@@ -34,7 +34,7 @@ private constructor(
         visitor.seeCreatedOn(createdOn)
     }
 
-    fun toPair() = vaccine pairNameWith this
+    fun getKey() = vaccine.makeKey()
 
     infix fun mustMatch(species: Species) = apply {
         vaccine mustMatch species

@@ -65,18 +65,16 @@ private constructor(
 
     fun getVaccineKey() = this.vaccine.makeKey()
 
-    fun toPair() = vaccine pairNameWith this
-
 }
 
 private fun Int.mustBePositive() =
-    when (this <= 0){
+    when (this <= 0) {
         true -> throw IllegalQuantityException from this
         else -> this
     }
 
-
 private infix fun Int.mustHaveEnough(quantityWanted: Int) {
-    if (this < quantityWanted) throw
-    IllegalQuantityException.of(this, quantityWanted)
+    when (this < quantityWanted) {
+        true -> throw IllegalQuantityException.of(this, quantityWanted)
+    }
 }

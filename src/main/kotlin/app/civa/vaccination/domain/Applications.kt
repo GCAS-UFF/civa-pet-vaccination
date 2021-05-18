@@ -7,38 +7,40 @@ const val MAX_VACCINES = 8
 
 class Applications : HashMap<String, Collection<VaccineApplication>>(MAX_VACCINES) {
 
-    infix fun add(entry: VaccineApplication) {
-        val (vaccineName, newApplication) = entry.toPair()
+    infix fun findBy(id: UUID) =
+        this.flatMap { it.value }
+            .firstOrNull { it.id == id }
+            ?: throw ApplicationNotFoundException from id
 
-        when (val status = this.mapStatus(vaccineName, newApplication)) {
-            null -> this.save(vaccineName, newApplication)
+    infix fun add(application: VaccineApplication) {
+        when (val status = this mapStatusFrom application) {
+            null -> this save application
             else -> throw InvalidApplicationException from status
         }
     }
 
-    private fun mapStatus(vaccineName: String, newApplication: VaccineApplication) =
-        this[vaccineName]
-            ?.map { it mapStatusFrom newApplication }
-            ?.lastOrNull { it != VALID }
-
-    infix fun findBy(id: UUID) =
-         this.flatMap { it.value }
-            .firstOrNull { it.id == id }
-            ?: throw ApplicationNotFoundException from id
-
     infix fun deleteBy(id: UUID) {
-        val (vaccineName, application) = this.findBy(id).toPair()
+        val application = this findBy id
+        val vaccineKey = application.getKey()
 
-        val filteredApplications = this[vaccineName] minus application
+        val filteredApplications = this[vaccineKey] minus application
 
         when (filteredApplications.size) {
-            0 -> this.remove(vaccineName)
-            else -> this[vaccineName] = filteredApplications
+            0 -> this.remove(vaccineKey)
+            else -> this[vaccineKey] = filteredApplications
         }
     }
 
-    private fun save(vaccineName: String, application: VaccineApplication) =
-        this.merge(vaccineName, listOf(application)) { a, b -> a + b }
+    private infix fun mapStatusFrom(application: VaccineApplication): DateTimeStatus? {
+        val vaccineKey = application.getKey()
+
+        return this[vaccineKey]
+            ?.map { it mapStatusFrom application }
+            ?.lastOrNull { it != VALID }
+    }
+
+    private infix fun save(application: VaccineApplication) =
+        this.merge(application.getKey(), listOf(application)) { a, b -> a + b }
 
     override fun toString() = "Applications(applications=${this.entries})"
 }
