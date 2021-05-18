@@ -19,6 +19,20 @@ private constructor(
     private val quantity: Int,
     private val vaccine: Vaccine
 ) {
+    companion object {
+        /**
+         * Factory method that instantiates a new [VaccineControl] if the provided quantity
+         * is positive
+         * @return a new instance of VaccineControl
+         * @throws IllegalQuantityException when the quantity provided is not positive.
+         */
+        fun from(quantity: Int, vaccine: Vaccine) = VaccineControl(
+            id = UUID.randomUUID(),
+            quantity = quantity.mustBePositive(),
+            vaccine = vaccine.mustBeValid()
+        )
+    }
+
     /**
      * Increases [quantity] if the value provided is positive.
      * @return a new instance of [VaccineControl] with updated [quantity]
@@ -49,27 +63,18 @@ private constructor(
         return this.quantity - quantityWanted
     }
 
+    fun getVaccineKey() = this.vaccine.makeKey()
+
     fun toPair() = vaccine pairNameWith this
 
-    companion object {
-        /**
-         * Factory method that instantiates a new [VaccineControl] if the provided quantity
-         * is positive
-         * @return a new instance of VaccineControl
-         * @throws IllegalQuantityException when the quantity provided is not positive.
-         */
-        fun from(quantity: Int, vaccine: Vaccine) = VaccineControl(
-            id = UUID.randomUUID(),
-            quantity = quantity.mustBePositive(),
-            vaccine = vaccine.mustBeValid()
-        )
-    }
 }
 
-private fun Int.mustBePositive(): Int {
-    if (this <= 0) throw IllegalQuantityException from this
-    else return this
-}
+private fun Int.mustBePositive() =
+    when (this <= 0){
+        true -> throw IllegalQuantityException from this
+        else -> this
+    }
+
 
 private infix fun Int.mustHaveEnough(quantityWanted: Int) {
     if (this < quantityWanted) throw

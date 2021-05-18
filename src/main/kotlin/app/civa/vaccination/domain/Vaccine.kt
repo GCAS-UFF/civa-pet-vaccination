@@ -6,7 +6,6 @@ private constructor(
     private val efficacy: Efficacy,
     private val fabrication: Fabrication
 ) {
-
     constructor(builder: VaccineBuilder) : this(
         builder.name,
         builder.efficacy,
@@ -18,6 +17,8 @@ private constructor(
         visitor.seeEfficacy(efficacy)
         visitor.seeFabrication(fabrication)
     }
+
+    fun makeKey() = this.name.key
 
     infix fun apply(petWeight: PetWeight) =
         VaccineApplication.from(vaccine = this, petWeight)

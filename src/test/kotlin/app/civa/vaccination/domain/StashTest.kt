@@ -24,13 +24,10 @@ class StashTest : BehaviorSpec({
     given("an empty stash") {
         `when`("a valid vaccine and a positive quantity is provided") {
             then("vaccine control should be added to the stash") {
-                val slot = slot<VaccineControl>()
                 val vaccineMock = mockk<Vaccine>()
 
                 every { vaccineMock.mustBeValid() } returns vaccineMock
-                every { vaccineMock pairNameWith capture(slot) } answers {
-                    Pair("Vaccine Test", slot.captured)
-                }
+                every { vaccineMock.makeKey() } returns "Vaccine Key"
 
                 val stash = Stash()
 
@@ -40,22 +37,20 @@ class StashTest : BehaviorSpec({
 
                 stash.shouldNotBeNull().shouldNotBeEmpty()
                 stash.size shouldBeExactly 1
-                stash.contains("Vaccine Test").shouldBeTrue()
+                stash.contains("Vaccine Key").shouldBeTrue()
 
                 verify {
                     vaccineMock.mustBeValid()
-                    vaccineMock pairNameWith ofType<VaccineControl>()
+                    vaccineMock.makeKey()
                 }
             }
         }
         `when`("a valid vaccine is provided") {
             then("one vaccine control should be added to the stash") {
-                val slot = slot<VaccineControl>()
                 val vaccineMock = mockk<Vaccine>()
+
                 every { vaccineMock.mustBeValid() } returns vaccineMock
-                every { vaccineMock pairNameWith capture(slot) } answers {
-                    Pair("Vaccine Test", slot.captured)
-                }
+                every { vaccineMock.makeKey() } returns "Vaccine Key"
 
                 val stash = Stash()
 
@@ -65,11 +60,11 @@ class StashTest : BehaviorSpec({
 
                 stash.shouldNotBeNull().shouldNotBeEmpty()
                 stash.size shouldBeExactly 1
-                stash.contains("Vaccine Test").shouldBeTrue()
+                stash.contains("Vaccine Key").shouldBeTrue()
 
                 verify {
                     vaccineMock.mustBeValid()
-                    vaccineMock pairNameWith ofType<VaccineControl>()
+                    vaccineMock.makeKey()
                 }
             }
         }
@@ -125,19 +120,16 @@ class StashTest : BehaviorSpec({
     given("an stash with a collection of vaccine control") {
         `when`("an existing vaccine name is provided") {
             then("a collection of control should be returned") {
-                val slot = slot<VaccineControl>()
                 val vaccineMock = mockk<Vaccine>()
 
                 every { vaccineMock.mustBeValid() } returns vaccineMock
-                every {
-                    vaccineMock pairNameWith capture(slot)
-                } answers { Pair("Vaccine Test", slot.captured) }
+                every { vaccineMock.makeKey() } returns "Vaccine Key"
 
                 val stash = Stash()
                 val control = stash.add(vaccineMock)
 
                 shouldNotThrowAny {
-                    val controlList = stash findVaccineByName "Vaccine Test"
+                    val controlList = stash findVaccineByName "Vaccine Key"
 
                     controlList.shouldNotBeNull().shouldNotBeEmpty()
                     controlList.contains(control)
@@ -146,13 +138,10 @@ class StashTest : BehaviorSpec({
         }
         `when`("a valid control id and a quantity is provided") {
             then("control should be increased") {
-                val slot = slot<VaccineControl>()
                 val vaccineMock = mockk<Vaccine>()
 
                 every { vaccineMock.mustBeValid() } returns vaccineMock
-                every {
-                    vaccineMock pairNameWith capture(slot)
-                } answers { Pair("Vaccine Test", slot.captured) }
+                every { vaccineMock.makeKey() } returns "Vaccine Key"
 
                 val stash = Stash()
                 val control = stash.add(vaccineMock)
@@ -162,13 +151,13 @@ class StashTest : BehaviorSpec({
 
                     updatedControl shouldNotBeSameInstanceAs control
 
-                    stash.contains("Vaccine Test").shouldBeTrue()
+                    stash.contains("Vaccine Key").shouldBeTrue()
 
-                    stash["Vaccine Test"]!!
+                    stash["Vaccine Key"]!!
                         .contains(updatedControl)
                         .shouldBeTrue()
 
-                    stash["Vaccine Test"]!!
+                    stash["Vaccine Key"]!!
                         .contains(control)
                         .shouldBeFalse()
                 }
@@ -176,13 +165,10 @@ class StashTest : BehaviorSpec({
         }
         `when`("a valid control id is provided") {
             then("a pair of control and vaccine should be retrieved") {
-                val slot = slot<VaccineControl>()
                 val vaccineMock = mockk<Vaccine>()
 
                 every { vaccineMock.mustBeValid() } returns vaccineMock
-                every {
-                    vaccineMock pairNameWith capture(slot)
-                } answers { Pair("Vaccine Test", slot.captured) }
+                every { vaccineMock.makeKey() } returns "Vaccine Key"
 
                 val stash = Stash()
                 val control = stash.add(vaccineMock)
@@ -196,13 +182,10 @@ class StashTest : BehaviorSpec({
                 }
             }
             then("it should find a single control") {
-                val slot = slot<VaccineControl>()
                 val vaccineMock = mockk<Vaccine>()
 
                 every { vaccineMock.mustBeValid() } returns vaccineMock
-                every {
-                    vaccineMock pairNameWith capture(slot)
-                } answers { Pair("Vaccine Test", slot.captured) }
+                every { vaccineMock.makeKey() } returns "Vaccine Key"
 
                 val stash = Stash()
                 val control = stash.add(vaccineMock)
