@@ -5,9 +5,9 @@ import java.util.*
 class Stash : HashMap<String, Collection<VaccineControl>>() {
 
     fun add(vaccine: Vaccine, quantity: Int = 1): VaccineControl {
-        val (vaccineName, control) = VaccineControl.from(quantity, vaccine).toPair()
+        val control = VaccineControl.from(quantity, vaccine)
 
-        this.merge(vaccineName, setOf(control)) { A, B -> A union B }
+        this.merge(vaccine.makeKey(), setOf(control)) { A, B -> A union B }
 
         return control
     }
@@ -22,24 +22,22 @@ class Stash : HashMap<String, Collection<VaccineControl>>() {
             ?: throw VaccineControlNotFoundException from id
 
     fun increaseStock(id: UUID, quantity: Int = 1): VaccineControl {
-        val (vaccineName, control) = this.findVaccineControlById(id).toPair()
-
+        val control = this.findVaccineControlById(id)
         val updatedControl = control.increaseBy(quantity)
-        this.updateInventory(vaccineName, updatedControl)
-
+        this updateInventoryWith updatedControl
         return updatedControl
     }
 
     fun retrieve(id: UUID, quantity: Int = 1): Vaccine {
-        val (vaccineName, control) = this.findVaccineControlById(id).toPair()
+        val control = this.findVaccineControlById(id)
         val (updatedControl, vaccine) = control.retrieve(quantity)
-
-        this.updateInventory(vaccineName, updatedControl)
-
+        this updateInventoryWith updatedControl
         return vaccine
     }
 
-    private fun updateInventory(vaccineName: String, updatedControl: VaccineControl) {
+    private infix fun updateInventoryWith(updatedControl: VaccineControl) {
+        val vaccineName = updatedControl.getVaccineKey()
+
         this[vaccineName] = this[vaccineName]!!
             .map { if (it.id == updatedControl.id) updatedControl else it }
     }

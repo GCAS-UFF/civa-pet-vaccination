@@ -6,7 +6,6 @@ private constructor(
     private val efficacy: Efficacy,
     private val fabrication: Fabrication
 ) {
-
     constructor(builder: VaccineBuilder) : this(
         builder.name,
         builder.efficacy,
@@ -19,14 +18,10 @@ private constructor(
         visitor.seeFabrication(fabrication)
     }
 
+    fun makeKey() = this.name.key
+
     infix fun apply(petWeight: PetWeight) =
         VaccineApplication.from(vaccine = this, petWeight)
-
-    infix fun pairNameWith(application: VaccineApplication) =
-        name pairWith application
-
-    infix fun pairNameWith(control: VaccineControl) =
-        name pairWith control
 
     infix fun mustMatch(species: Species) = apply {
         efficacy mustMatch species

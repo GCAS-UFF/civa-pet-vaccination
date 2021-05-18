@@ -5,6 +5,7 @@ private constructor(
     private val classification: String,
     private val commercial: String
 ) {
+    val key = this.classification
 
     constructor(builder: NameBuilder) : this(
         builder.classification.trim(),
