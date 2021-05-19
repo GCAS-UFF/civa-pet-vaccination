@@ -9,9 +9,11 @@ import org.springframework.web.reactive.function.server.router
 class HttpRouter {
 
     @Bean
-    fun mainRouter(vaccinationCardHandler: VaccinationCardHandler) = router {
-        accept(APPLICATION_JSON).nest {
-            POST("/vaccination-card", vaccinationCardHandler::createOne)
+    fun vaccinationCardRouter(vaccinationCardHandler: VaccinationCardHandler) = router {
+        "/vaccination-card".nest {
+            accept(APPLICATION_JSON).nest {
+                POST(vaccinationCardHandler::createOne)
+            }
         }
     }
 }
