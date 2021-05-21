@@ -7,6 +7,6 @@ import java.util.*
 
 interface VaccinationCardPortIn {
 
-    fun createOne(entry: Pair<UUID, Species>): Mono<VaccinationCard>
-
+    suspend fun createOne(petId: UUID, species: Species): String
+    suspend fun findById(id: UUID): VaccinationCard?
 }

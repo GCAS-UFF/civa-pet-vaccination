@@ -4,8 +4,8 @@ import java.util.*
 
 class VaccinationCard
 private constructor(
-    private val id: UUID,
-    private val petID: UUID,
+    val id: UUID,
+    private val petId: UUID,
     private val species: Species,
     private val applications: Applications
 ) {
@@ -30,7 +30,7 @@ private constructor(
 
     infix fun accepts(visitor: VaccinationCardVisitor) {
         visitor.seeId(id)
-        visitor.seePetId(petID)
+        visitor.seePetId(petId)
         visitor.seeSpecies(species)
         visitor.seeApplications(applications)
     }
@@ -46,7 +46,7 @@ private constructor(
 
     override fun toString() =
         "VaccinationCard(id=$id, " +
-                "petID=$petID, " +
+                "petID=$petId, " +
                 "species=$species, " +
                 "applications=$applications"
 }

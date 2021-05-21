@@ -3,7 +3,6 @@ package app.civa.vaccination.usecases
 import app.civa.vaccination.domain.Species
 import app.civa.vaccination.domain.VaccinationCard
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import java.util.*
 
 @Service
@@ -11,9 +10,13 @@ class VaccinationCardService(
     private val vaccinationCardPortOut: VaccinationCardPortOut
 ) : VaccinationCardPortIn {
 
-    override fun createOne(entry: Pair<UUID, Species>): Mono<VaccinationCard> {
-        return Mono.just(VaccinationCard.of(entry))
-            .flatMap { vaccinationCardPortOut.createOne(it) }
+    override suspend fun createOne(petId: UUID, species: Species): String {
+        val card = VaccinationCard.of(petId to species)
+        vaccinationCardPortOut.createOne(petId, card)
+        return card.id.toString()
     }
+
+    override suspend fun findById(id: UUID) =
+        vaccinationCardPortOut.findById(id)
 
 }
