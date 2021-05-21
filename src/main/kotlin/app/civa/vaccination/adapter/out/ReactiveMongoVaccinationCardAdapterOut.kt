@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
-import java.lang.IllegalArgumentException
 import java.util.*
 
 @Repository
@@ -19,23 +18,21 @@ class ReactiveMongoVaccinationCardAdapterOut(
     private val operations: ReactiveMongoOperations
 ) : VaccinationCardPortOut {
 
-    override suspend fun createOne(petId: UUID, card: VaccinationCard): VaccinationCard? {
-        return if (existsByPetId(petId)) {
-            throw IllegalArgumentException()
-        } else {
-            operations.save<VaccinationCard>(card).awaitFirst()
+    override suspend fun createOne(petId: UUID, card: VaccinationCard) =
+        when (this existsByPetId petId) {
+            true -> null
+            false -> operations.save<VaccinationCard>(card).awaitFirst()
         }
-    }
 
-    override suspend fun findById(id: UUID): VaccinationCard? {
-        return operations.find<VaccinationCard>(
+    override suspend fun findById(id: UUID) =
+        operations.find<VaccinationCard>(
             Query(where("_id").isEqualTo(id))
         ).awaitFirstOrNull()
-    }
 
-    override suspend fun existsByPetId(id: UUID): Boolean {
-        return operations.exists<VaccinationCard>(
+
+    override suspend infix fun existsByPetId(id: UUID): Boolean =
+        operations.exists<VaccinationCard>(
             Query(where("petId").isEqualTo(id))
         ).awaitFirst()
-    }
 }
+

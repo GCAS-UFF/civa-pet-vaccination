@@ -7,25 +7,27 @@ private constructor(
     val id: UUID,
     private val petId: UUID,
     private val species: Species,
-    private val applications: Applications
+    private val applications: Applications,
+    private var auditMetadata: AuditMetadata?
 ) {
+
     companion object {
-        infix fun of(petEntry: Pair<UUID, Species>): VaccinationCard {
-            val (petId, species) = petEntry
-            return VaccinationCard(
+        infix fun of(petEntry: Pair<UUID, Species>) =
+            VaccinationCard(
                 UUID.randomUUID(),
-                petId,
-                species,
-                Applications()
+                petId = petEntry.first,
+                species = petEntry.second,
+                Applications(),
+                AuditMetadata.creation()
             )
-        }
     }
 
     constructor(builder: VaccinationCardBuilder) : this(
         builder.id,
         builder.petId,
         builder.species,
-        builder.applications
+        builder.applications,
+        AuditMetadata.creation()
     )
 
     infix fun accepts(visitor: VaccinationCardVisitor) {

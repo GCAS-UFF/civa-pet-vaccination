@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class VaccinationApplication
 
 fun main(args: Array<String>) {
-	runApplication<VaccinationApplication>(*args)
+    runApplication<VaccinationApplication>(*args)
 }
