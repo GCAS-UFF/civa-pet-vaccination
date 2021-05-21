@@ -2,6 +2,8 @@ package app.civa.vaccination.adapter.`in`
 
 import app.civa.vaccination.domain.DomainException
 import app.civa.vaccination.usecases.VaccinationCardPortIn
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.stereotype.Controller
 import org.springframework.web.reactive.function.server.*
@@ -15,7 +17,7 @@ class VaccinationCardHandler(
 
     suspend fun createOne(req: ServerRequest): ServerResponse {
         return try {
-            val (petId, species) = req.awaitBody<VaccinationCardPayloadIn>().toPair()
+            val (petId, species) = req.awaitBody<VaccinationCardPayloadIn>()
             val cardId = vaccinationCardPortIn.createOne(petId, species)
 
             created(buildLocation(req, cardId))
@@ -26,7 +28,7 @@ class VaccinationCardHandler(
                 .contentType(APPLICATION_JSON)
                 .buildAndAwait()
         } catch (e: DomainException) {
-            badRequest().bodyValueAndAwait(e.explain())
+            status(INTERNAL_SERVER_ERROR).bodyValueAndAwait(e.explain())
         }
     }
 
