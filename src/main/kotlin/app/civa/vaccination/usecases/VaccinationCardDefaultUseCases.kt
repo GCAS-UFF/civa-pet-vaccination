@@ -18,6 +18,6 @@ class VaccinationCardDefaultUseCases(
         }
     }
 
-    override suspend fun findById(cardId: UUID) = persistence.findById(cardId)
+    override suspend fun findById(cardId: UUID) = persistence findById cardId
 
 }

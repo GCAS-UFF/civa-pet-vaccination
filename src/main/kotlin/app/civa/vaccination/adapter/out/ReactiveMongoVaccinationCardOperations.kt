@@ -24,7 +24,7 @@ class ReactiveMongoVaccinationCardOperations(
             false -> operations.save(card).awaitFirst()
         }
 
-    override suspend fun findById(cardId: UUID) =
+    override suspend infix fun findById(cardId: UUID) =
         operations.find<VaccinationCard>(
             Query(where("_id").isEqualTo(cardId))
         ).awaitFirstOrNull()
