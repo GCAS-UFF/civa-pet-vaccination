@@ -4,9 +4,9 @@ import app.civa.vaccination.domain.VaccinationCard
 import reactor.core.publisher.Mono
 import java.util.*
 
-interface VaccinationCardPortOut {
+interface VaccinationCardPersistence {
 
     suspend fun createOne(petId: UUID, card: VaccinationCard): VaccinationCard?
-    suspend fun findById(id: UUID): VaccinationCard?
-    suspend fun existsByPetId(id: UUID): Boolean
+    suspend fun findById(cardId: UUID): VaccinationCard?
+    suspend fun existsByPetId(petId: UUID): Boolean
 }

@@ -5,8 +5,8 @@ import app.civa.vaccination.domain.VaccinationCard
 import reactor.core.publisher.Mono
 import java.util.*
 
-interface VaccinationCardPortIn {
+interface VaccinationCardUseCases {
 
     suspend fun createOne(petId: UUID, species: Species): String?
-    suspend fun findById(id: UUID): VaccinationCard?
+    suspend fun findById(cardId: UUID): VaccinationCard?
 }

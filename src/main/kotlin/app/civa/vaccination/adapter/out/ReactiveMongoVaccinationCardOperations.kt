@@ -1,7 +1,7 @@
 package app.civa.vaccination.adapter.out
 
 import app.civa.vaccination.domain.VaccinationCard
-import app.civa.vaccination.usecases.VaccinationCardPortOut
+import app.civa.vaccination.usecases.VaccinationCardPersistence
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
@@ -14,25 +14,23 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-class ReactiveMongoVaccinationCardAdapterOut(
+class ReactiveMongoVaccinationCardOperations(
     private val operations: ReactiveMongoOperations
-) : VaccinationCardPortOut {
+) : VaccinationCardPersistence {
 
     override suspend fun createOne(petId: UUID, card: VaccinationCard) =
         when (this existsByPetId petId) {
             true -> null
-            false -> operations.save<VaccinationCard>(card).awaitFirst()
+            false -> operations.save(card).awaitFirst()
         }
 
-    override suspend fun findById(id: UUID) =
+    override suspend fun findById(cardId: UUID) =
         operations.find<VaccinationCard>(
-            Query(where("_id").isEqualTo(id))
+            Query(where("_id").isEqualTo(cardId))
         ).awaitFirstOrNull()
 
-
-    override suspend infix fun existsByPetId(id: UUID): Boolean =
+    override suspend infix fun existsByPetId(petId: UUID): Boolean =
         operations.exists<VaccinationCard>(
-            Query(where("petId").isEqualTo(id))
+            Query(where("petId").isEqualTo(petId))
         ).awaitFirst()
 }
-

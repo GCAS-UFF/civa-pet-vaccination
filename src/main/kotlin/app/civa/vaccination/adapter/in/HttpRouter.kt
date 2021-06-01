@@ -9,11 +9,11 @@ import org.springframework.web.reactive.function.server.coRouter
 class HttpRouter {
 
     @Bean
-    fun vaccinationCard(handler: VaccinationCardHandler) = coRouter {
+    fun vaccinationCard(httpHandler: VaccinationCardHttpHandler) = coRouter {
         "/vaccination-card".nest {
             accept(APPLICATION_JSON).nest {
-                GET("/{id}", handler::readOne)
-                POST("", handler::createOne)
+                GET("/{id}", httpHandler::readOne)
+                POST("", httpHandler::createOne)
             }
         }
     }
