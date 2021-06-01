@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-class ReactiveMongoVaccinationCardOperations(
+class ReactiveMongoVaccinationCard(
     private val operations: ReactiveMongoOperations
 ) : VaccinationCardPersistence {
 
