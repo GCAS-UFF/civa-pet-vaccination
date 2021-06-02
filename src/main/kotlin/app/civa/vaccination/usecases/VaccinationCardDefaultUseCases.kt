@@ -20,4 +20,5 @@ class VaccinationCardDefaultUseCases(
 
     override suspend fun findById(cardId: UUID) = persistence findById cardId
 
+    override suspend fun deleteOne(cardId: UUID) = persistence deleteById cardId
 }

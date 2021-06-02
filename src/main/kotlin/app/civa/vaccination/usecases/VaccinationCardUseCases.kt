@@ -9,4 +9,6 @@ interface VaccinationCardUseCases {
 
     suspend fun createOne(petId: UUID, species: Species): String?
     suspend fun findById(cardId: UUID): VaccinationCard?
+    suspend fun deleteOne(cardId: UUID): VaccinationCard?
+
 }

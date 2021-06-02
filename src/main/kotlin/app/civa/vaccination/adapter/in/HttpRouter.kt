@@ -13,6 +13,7 @@ class HttpRouter {
         "/vaccination-card".nest {
             accept(APPLICATION_JSON).nest {
                 GET("/{id}", httpHandler::readOne)
+                DELETE("/{id}", httpHandler::deleteOne)
                 POST("", httpHandler::createOne)
             }
         }

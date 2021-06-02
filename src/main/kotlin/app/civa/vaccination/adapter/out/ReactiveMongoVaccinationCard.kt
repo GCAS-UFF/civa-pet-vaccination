@@ -7,6 +7,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.exists
 import org.springframework.data.mongodb.core.find
+import org.springframework.data.mongodb.core.findAndRemove
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
@@ -26,6 +27,11 @@ class ReactiveMongoVaccinationCard(
 
     override suspend infix fun findById(cardId: UUID) =
         operations.find<VaccinationCard>(
+            Query(where("_id").isEqualTo(cardId))
+        ).awaitFirstOrNull()
+
+    override suspend fun deleteById(cardId: UUID) =
+        operations.findAndRemove<VaccinationCard>(
             Query(where("_id").isEqualTo(cardId))
         ).awaitFirstOrNull()
 
