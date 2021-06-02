@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      uuid-representation: standard
+      database: civa-vaccination
