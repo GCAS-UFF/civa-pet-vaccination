@@ -6,8 +6,8 @@ import java.util.*
 
 interface VaccinationCardPersistence {
 
-    suspend fun createOne(petId: UUID, card: VaccinationCard): VaccinationCard?
-    suspend infix fun findById(cardId: UUID): VaccinationCard?
-    suspend infix fun deleteById(cardId: UUID): VaccinationCard?
+    suspend fun createOne(petId: UUID, card: VaccinationCard): VaccinationCard
+    suspend infix fun findById(cardId: UUID): VaccinationCard
+    suspend infix fun deleteById(cardId: UUID): VaccinationCard
     suspend infix fun existsByPetId(petId: UUID): Boolean
 }
