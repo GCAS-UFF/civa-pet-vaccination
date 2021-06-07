@@ -1,5 +1,6 @@
 package app.civa.vaccination.usecases
 
+import app.civa.vaccination.domain.Inventory
 import app.civa.vaccination.domain.Vaccine
 import org.springframework.stereotype.Service
 import java.util.*
@@ -8,8 +9,10 @@ import java.util.*
 class InventoryDefaultUseCases(
     private val persistence: InventoryPersistence
 ) : InventoryUseCases {
+
     override suspend fun createOne(vetId: UUID): String {
-        TODO("Not yet implemented")
+        val inventory = Inventory from vetId
+        return persistence.createOne(vetId, inventory).id.toString()
     }
 
     override suspend fun findByVetId(vetId: UUID) =

@@ -4,11 +4,13 @@ import app.civa.vaccination.domain.DomainException
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse.*
+import org.springframework.web.reactive.function.server.bodyValueAndAwait
+import org.springframework.web.reactive.function.server.buildAndAwait
+import org.springframework.web.reactive.function.server.coRouter
 import java.util.*
 
 @Configuration
@@ -30,6 +32,7 @@ class HttpRouter {
         "/inventory".nest {
             accept(APPLICATION_JSON).nest {
                 GET("", handler::readAll)
+                POST("", handler::createOne)
             }
         }
     }
@@ -42,7 +45,10 @@ infix fun ServerRequest.locationOf(id: String) =
 
 suspend fun handleException(e: Exception) = when (e) {
     is NoSuchElementException -> notFound().buildAndAwait()
-    is IllegalArgumentException, is DuplicateKeyException -> badRequest().buildAndAwait()
-    is DomainException -> unprocessableEntity().bodyValueAndAwait(e.explain())
+    is IllegalArgumentException -> badRequest().buildAndAwait()
+    is DuplicateKeyException -> badRequest()
+        .bodyValueAndAwait(ExplanationPayloadOut(e.message!!))
+    is DomainException -> unprocessableEntity()
+        .bodyValueAndAwait(ExplanationPayloadOut(e.explain()))
     else -> status(INTERNAL_SERVER_ERROR).buildAndAwait()
 }

@@ -2,10 +2,9 @@ package app.civa.vaccination.adapter.`in`
 
 import app.civa.vaccination.usecases.InventoryUseCases
 import org.springframework.stereotype.Controller
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerResponse.created
 import org.springframework.web.reactive.function.server.ServerResponse.ok
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
 
 @Controller
 class InventoryHttpHandler(
@@ -20,8 +19,17 @@ class InventoryHttpHandler(
                 ?: throw IllegalArgumentException()
 
             val inventory = inventoryUseCases.findByVetId(vetId)
-
             ok().bodyValueAndAwait(inventory)
+        } catch (e: Exception) {
+            handleException(e)
+        }
+    }
+
+    suspend fun createOne(req: ServerRequest): ServerResponse {
+        return try {
+            val (vetId) = req.awaitBody<InventoryPayloadIn>()
+            val inventoryId = inventoryUseCases.createOne(vetId)
+            created(req locationOf inventoryId).buildAndAwait()
         } catch (e: Exception) {
             handleException(e)
         }
