@@ -11,11 +11,10 @@ Patterns employed:
 - Behavior Driven Development (BDD)
 - Hexagonal Architecture
 - CI/CD
+- Reactive Programming with Kotlin coroutines
 
 Ideas to explore:
-- Reactive Programming
 - Kafka
-- Event Sourcing
 - CQRS
 - Server-sent Events
 - Kubernetes
